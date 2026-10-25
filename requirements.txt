@@ -6,6 +6,8 @@ jinja2
 passlib
 python-jose
 python-multipart
+pymssql
+pyodbc
 email-validator
 cryptography
 dnspython
