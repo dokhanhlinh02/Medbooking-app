@@ -11,3 +11,4 @@ pyodbc
 email-validator
 cryptography
 dnspython
+psycopg2-binary
