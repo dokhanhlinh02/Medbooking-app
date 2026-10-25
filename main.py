@@ -1,12 +1,13 @@
 from pathlib import Path
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 # 1. Khởi tạo cơ sở dữ liệu và nạp models
 from database.database import engine, Base
-import models
+from models import  models
 from pydantic import BaseModel
 
 # 2. Import TẤT CẢ các router từ thư mục routers

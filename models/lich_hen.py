@@ -15,7 +15,14 @@ class LichLamViec(Base):
     __tablename__ = "lich_lam_viec"
     __table_args__ = {"extend_existing": True}
 
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    # Đảm bảo có ít nhất một cột được đặt primary_key=True
+    id = Column(Integer, primary_key=True, index=True) 
+    
+    # Các cột khác...
+    con_trong = Column(Boolean, nullable=False, default=True)
+
+
+    le_tan_ma_le_tan = Column(Integer, ForeignKey("le_tan.ma_le_tan"), nullable=True)
     bac_si_id = Column(Integer, ForeignKey("bac_si.id", ondelete="CASCADE"), nullable=False)
     ngay_kham = Column(Date, nullable=False)
     khung_gio = Column(String(100), nullable=False)
@@ -34,7 +41,7 @@ class LichHen(Base):
     bac_si_id = Column(Integer, ForeignKey("bac_si.id"), nullable=True)
 
     # Bổ sung liên kết tới Lễ tân để lễ tân tiếp nhận thông tin bệnh nhân
-    le_tan_id = Column(Integer, ForeignKey("le_tan.id"), nullable=True)
+    le_tan_ma_le_tan = Column(Integer, ForeignKey("le_tan.ma_le_tan"), nullable=True)
 
     dich_vu_id = Column(Integer, ForeignKey("dich_vu.id"), nullable=False)
     ngay_kham = Column(Date, nullable=False)

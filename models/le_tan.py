@@ -15,9 +15,9 @@ class LeTan(Base):
     ma_le_tan = Column(
         Integer,
         ForeignKey("nguoi_dung.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True,
+        index=True
     )
-
     quay_lam_viec = Column(String(50), nullable=True)
     ca_truc = Column(String(50), nullable=True)
     ngay_vao_lam = Column(DateTime, default=utc_now)

@@ -7,8 +7,12 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 # ============================================================
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "mssql+pyodbc://@KHANHLINH/PhongKhamDB?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+    "sqlite:///./medbooking.db"
 )
+
+# Tự động chuyển đổi chuỗi kết nối PostgreSQL sang psycopg2 để khớp với thư viện đã cài
+if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 # ============================================================
 # 2. Khởi tạo Engine
