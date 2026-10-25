@@ -7,9 +7,8 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 # ============================================================
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "sqlite:///./medbooking.db"
+    "mssql+pyodbc://@KHANHLINH/PhongKhamDB?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
 )
-
 # ============================================================
 # 2. Khởi tạo Engine
 # ============================================================
