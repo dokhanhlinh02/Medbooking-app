@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEDBOOKING - Chẩn đoán & Kê đơn</title>
+<!-- Favicon SVG hình trái tim đơn giản, ý nghĩa -->
+<link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+
+<link rel="stylesheet" href="../../static/css/BS.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@700&display=swap" rel="stylesheet">
+<style>
+    /* In đậm và hiển thị rõ ràng logo MedBooking */
+    .brand .logo-text h1 {
+        font-family: 'Quicksand', sans-serif !important;
+        font-weight: 800 !important;
+        font-size: 22px !important;
+        text-transform: none !important;
+        letter-spacing: -0.01em;
+        color: #FFFFFF !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    [data-theme="light"] .brand .logo-text h1 {
+        color: #1E293B !important;
+    }
+
+    /* Hiệu ứng hover cho user-chip của bác sĩ */
+    .user-chip-container {
+        position: relative;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+    }
+    .topbar-right .user-chip {
+        transition: all 0.25s ease;
+    }
+    .user-chip-container:hover .user-chip {
+        background: var(--primary-light, #f3e8ff);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        transform: translateY(-1px);
+    }
+
+    /* Khung dropdown thông báo và menu user: Nền đặc hoàn toàn, tách lớp rõ ràng */
+    .notification-dropdown, 
+    .user-dropdown {
+        position: absolute !important;
+        top: 60px !important;
+        background-color: #FFFFFF !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        opacity: 1 !important;
+        border: 2px solid #CBD5E1 !important;
+        border-radius: 18px !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        display: none;
+        z-index: 2147483647 !important;
+        overflow: hidden;
+    }
+
+    /* Khi ở chế độ tối (Dark mode) */
+    [data-theme="dark"] .notification-dropdown,
+    [data-theme="dark"] .user-dropdown,
+    html.dark .notification-dropdown,
+    html.dark .user-dropdown {
+        background-color: #0F172A !important;
+        border-color: #334155 !important;
+    }
+
+    .notification-dropdown.active, 
+    .user-dropdown.active {
+        display: block !important;
+    }
+
+    .notification-header {
+        padding: 12px 16px;
+        font-weight: 700;
+        font-size: 13px;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(236, 72, 153, 0.08)) !important;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .notification-header span:first-child {
+        background: linear-gradient(135deg, #8B5CF6, #EC4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        font-size: 13.5px;
+    }
+
+    .notification-list {
+        max-height: 280px;
+        overflow-y: auto;
+        background-color: transparent !important;
+    }
+
+    .notification-item {
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+        font-size: 12px;
+        background-color: transparent !important;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .notification-item:hover {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+    }
+    
+    .notification-item strong {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 12.5px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Định dạng riêng cho menu Đăng xuất */
+    .user-dropdown {
+        right: 0 !important;
+        width: 170px !important;
+    }
+    .user-dropdown a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #EF4444 !important;
+        text-decoration: none;
+        background-color: transparent !important;
+        transition: all 0.2s;
+    }
+    .user-dropdown a:hover {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .device-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 10px;
+    }
+    .device-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 8px;
+        background: var(--bg-card, #fff);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .device-item:hover {
+        border-color: #3b82f6;
+        background: rgba(59, 130, 246, 0.05);
+    }
+    .device-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo-container">
+        <div class="logo-icon"><i class="fas fa-headset"></i></div>
+        <div class="logo-text">
+          <h1>MedBooking</h1>
+          <p>Bác sĩ</p>
+        </div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">Tổng quan</div>
+      <ul class="nav-list"><li><a href="home_bs.html" class="nav-link"><i class="fas fa-house-medical"></i><span>Trang chủ Bác sĩ</span></a></li></ul>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">Tác nghiệp khám bệnh</div>
+      <ul class="nav-list">
+        <li><a href="danh_sach_ca_kham.html" class="nav-link"><i class="fas fa-calendar-check"></i><span>Lịch hẹn & Ca khám</span></a></li>
+        <li><a href="ho_so_ca_nhan.html" class="nav-link"><i class="fas fa-user-doctor"></i><span>Hồ sơ & Lịch trực</span></a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar-sm" id="sidebar-avatar">BS</div>
+      <div class="info"><strong id="sidebar-doctor-name">BS. Bác sĩ</strong><span id="sidebar-doctor-specialty">Nội Tổng Quát</span></div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+        <h1 class="page-title">Khám bệnh & Kê đơn</h1>
+      </div>
+      <div class="topbar-right" style="position: relative; display: flex; align-items: center; gap: 12px;">
+        <a href="danh_sach_ca_kham.html" class="btn btn-outline btn-sm">
+          <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+        <button class="icon-btn theme-toggle" id="theme-toggle"><i class="fas fa-moon"></i><i class="fas fa-sun"></i></button>
+        <button class="icon-btn" id="btn-notify"><i class="fas fa-bell"></i><span class="badge" style="display:inline-block; width:8px; height:8px; background:#F472B6; border-radius:50%; position:absolute; top:8px; right:110px;"></span></button>
+        
+        <!-- Khung dropdown thông báo -->
+        <div class="notification-dropdown" id="notification-dropdown">
+            <div class="notification-header">
+                <span>Thông báo mới</span>
+                <span style="font-size:11px; font-weight:700; color:#38BDF8; cursor:pointer;" id="mark-all-read">Đánh dấu đã đọc</span>
+            </div>
+            <div class="notification-list">
+                <div class="notification-item">
+                    <strong>Lịch hẹn mới</strong>
+                    Bệnh nhân vừa đặt lịch khám vào lúc 09:00 sáng mai.
+                </div>
+                <div class="notification-item">
+                    <strong>Cập nhật lịch trực</strong>
+                    Admin đã duyệt lịch trực tuần tới của bạn.
+                </div>
+                <div class="notification-item">
+                    <strong>Kết quả xét nghiệm</strong>
+                    Bệnh nhân đã có kết quả cận lâm sàng.
+                </div>
+            </div>
+        </div>
+
+        <!-- Nút thông tin bác sĩ bấm vào hiện menu Đăng xuất -->
+        <div class="user-chip-container" id="user-menu-btn">
+          <div class="user-chip">
+            <div class="avatar" id="topbar-avatar">BS</div>
+            <span class="name" id="topbar-doctor-name">BS. Bác sĩ</span>
+          </div>
+          
+          <div class="user-dropdown" id="user-dropdown">
+              <a href="../dk_dn/dn.html"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-user-injured"></i> Thông tin Bệnh nhân</h2>
+          <span class="badge-status badge-waiting" id="patient-status">Chờ khám</span>
+        </div>
+        <div class="patient-card">
+          <div class="info-item"><span class="k">Mã lịch hẹn</span><span class="v" id="p-id">—</span></div>
+          <div class="info-item"><span class="k">Họ và tên</span><span class="v" id="p-name">—</span></div>
+          <div class="info-item"><span class="k">Tuổi / Giới tính</span><span class="v" id="p-age">—</span></div>
+          <div class="info-item"><span class="k">SĐT / Email</span><span class="v" id="p-contact">—</span></div>
+          <div class="info-item" style="grid-column:1/-1;">
+            <span class="k">Triệu chứng khai báo</span><span class="v" id="p-symptom">—</span>
+          </div>
+        </div>
+      </section>
+
+      <form id="form-diagnosis" novalidate>
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title"><i class="fas fa-notes-medical"></i> 1. Kết quả Khám & Chẩn đoán</h2>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="clinical-notes">
+              Triệu chứng thực thể / Kết quả khám
+              <span class="required-badge">BẮT BUỘC</span>
+            </label>
+            <textarea id="clinical-notes" class="form-control" rows="3"
+              placeholder="Nhập kết quả thăm khám lâm sàng (tối thiểu 10 ký tự)..."
+              data-min="10" data-field="clinical"></textarea>
+            <span class="char-counter" data-for="clinical-notes">0 / 10 ký tự tối thiểu</span>
+            <span class="error-message" data-error="clinical"></span>
+          </div>
+
+          <!-- MỤC CHỌN THIẾT BỊ Y TẾ ĐÃ SỬ DỤNG -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-stethoscope"></i> Thiết bị y tế đã sử dụng khi chẩn đoán
+            </label>
+            <div class="device-grid">
+              <label class="device-item">
+                <input type="checkbox" name="medical_device" value="Máy đo huyết áp">
+                <span><i class="fas fa-heart-pulse"></i> Máy đo huyết áp</span>
+              </label>
+              <label class="device-item">
+                <input type="checkbox" name="medical_device" value="Ống nghe y tế">
+                <span><i class="fas fa-stethoscope"></i> Ống nghe y tế</span>
+              </label>
+              <label class="device-item">
+                <input type="checkbox" name="medical_device" value="Máy đo SpO2">
+                <span><i class="fas fa-wave-square"></i> Máy đo SpO2</span>
+              </label>
+              <label class="device-item">
+                <input type="checkbox" name="medical_device" value="Nhiệt kế hồng ngoại">
+                <span><i class="fas fa-temperature-high"></i> Nhiệt kế hồng ngoại</span>
+              </label>
+              <label class="device-item">
+                <input type="checkbox" name="medical_device" value="Máy đo đường huyết">
+                <span><i class="fas fa-droplet"></i> Máy đo đường huyết</span>
+              </label>
+              <label class="device-item">
+                <input type="checkbox" name="medical_device" value="Máy điện tim (ECG)">
+                <span><i class="fas fa-chart-line"></i> Máy điện tim (ECG)</span>
+              </label>
+              <label class="device-item">
+                <input type="checkbox" name="medical_device" value="Máy siêu âm cầm tay">
+                <span><i class="fas fa-display"></i> Máy siêu âm cầm tay</span>
+              </label>
+              <label class="device-item">
+                <input type="checkbox" name="medical_device" value="Đèn soi tai mũi họng">
+                <span><i class="fas fa-lightbulb"></i> Đèn soi tai mũi họng</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="diagnosis-result">
+              Chẩn đoán bệnh (ICD / Tên bệnh)
+              <span class="required-badge">BẮT BUỘC</span>
+            </label>
+            <input type="text" id="diagnosis-result" class="form-control"
+              placeholder="Ví dụ: Rối loạn tiền đình (tối thiểu 5 ký tự)..."
+              data-min="5" data-field="diagnosis">
+            <span class="error-message" data-error="diagnosis"></span>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title"><i class="fas fa-pills"></i> 2. Kê đơn thuốc</h2>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-add-medicine">
+              <i class="fas fa-plus"></i> Thêm thuốc
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width:50px;">STT</th>
+                  <th>Tên thuốc <span class="required-badge">*</span></th>
+                  <th>Liều lượng / Cách dùng <span class="required-badge">*</span></th>
+                  <th style="width:110px;">Số lượng <span class="required-badge">*</span></th>
+                  <th style="width:80px;">Xóa</th>
+                </tr>
+              </thead>
+              <tbody id="prescription-list-body"></tbody>
+            </table>
+          </div>
+          <span class="error-message" data-error="medicines" style="margin-top:8px;"></span>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title"><i class="fas fa-comment-medical"></i> 3. Lời dặn & Tái khám</h2>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="doctor-advice">
+              Lời dặn của bác sĩ
+              <span class="required-badge">BẮT BUỘC</span>
+            </label>
+            <textarea id="doctor-advice" class="form-control" rows="3"
+              placeholder="Ăn uống nghỉ ngơi điều độ, uống đủ nước... (tối thiểu 10 ký tự)"
+              data-min="10" data-field="advice"></textarea>
+            <span class="char-counter" data-for="doctor-advice">0 / 10 ký tự tối thiểu</span>
+            <span class="error-message" data-error="advice"></span>
+          </div>
+
+          <div class="recheck-toggle" id="recheck-toggle-wrap">
+            <input type="checkbox" id="recheck-required">
+            <label for="recheck-required">
+              <i class="fas fa-calendar-plus"></i>
+              Yêu cầu bệnh nhân tái khám (gửi SMS + Email)
+            </label>
+          </div>
+
+          <div class="recheck-panel" id="recheck-panel">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="recheck-date">
+                  Ngày tái khám dự kiến <span class="required-badge">BẮT BUỘC</span>
+                </label>
+                <input type="date" id="recheck-date" class="form-control">
+                <span class="error-message" data-error="recheckDate"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="recheck-session">
+                  Ca khám mong muốn <span class="required-badge">BẮT BUỘC</span>
+                </label>
+                <select id="recheck-session" class="form-control">
+                  <option value="morning">Sáng (08:00 - 12:00)</option>
+                  <option value="afternoon">Chiều (13:30 - 17:30)</option>
+                  <option value="any">Bất kỳ ca nào</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="recheck-note">Ghi chú cho bệnh nhân (tùy chọn)</label>
+              <textarea id="recheck-note" class="form-control" rows="2"
+                placeholder="Ví dụ: Mang theo đơn thuốc cũ, nhịn ăn trước khi khám..."></textarea>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button type="button" class="btn btn-outline" id="btn-save-draft">
+              <i class="fas fa-floppy-disk"></i> Lưu nháp
+            </button>
+            <button type="button" class="btn btn-success" id="btn-complete-examination">
+              <i class="fas fa-circle-check"></i> Hoàn thành ca khám & Gửi đơn
+            </button>
+          </div>
+        </section>
+      </form>
+    </main>
+  </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<script src="../../static/js/bac_si.js"></script>
+<script>
+window.MB_PAGE_INIT = function () {
+  let currentDoctorName = 'BS. Bác sĩ';
+  try {
+    let doctorName = 'Bác sĩ';
+    const loggedInUser = localStorage.getItem('medbooking_logged_in_user');
+    const currentUser = localStorage.getItem('medbooking_current_user');
+    const currentEmail = localStorage.getItem('medbooking_email');
+
+    if (loggedInUser) {
+      const userData = JSON.parse(loggedInUser);
+      doctorName = userData.name || userData.fullname || userData.ho_ten || doctorName;
+    } else if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      doctorName = userData.name || userData.fullname || userData.ho_ten || doctorName;
+    } else if (currentEmail) {
+      const users = JSON.parse(localStorage.getItem('medbooking_users')) || [];
+      const found = users.find(u => u.email === currentEmail);
+      if (found) {
+        doctorName = found.fullname || found.name || doctorName;
+      }
+    }
+
+    currentDoctorName = doctorName.startsWith('BS.') ? doctorName : `BS. ${doctorName}`;
+    
+    // Cập nhật tên trên Topbar và Sidebar
+    const topbarNameEl = document.getElementById('topbar-doctor-name');
+    if (topbarNameEl) topbarNameEl.textContent = currentDoctorName;
+
+    const sidebarNameEl = document.getElementById('sidebar-doctor-name');
+    if (sidebarNameEl) sidebarNameEl.textContent = currentDoctorName;
+
+    // Cập nhật Avatar viết tắt
+    const cleanName = doctorName.replace(/^BS\.\s*/i, '').trim();
+    const parts = cleanName.split(/\s+/);
+    let initials = 'BS';
+    if (parts.length >= 2) {
+      initials = (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+    } else if (parts.length === 1 && parts[0].length > 0) {
+      initials = parts[0].slice(0, 2).toUpperCase();
+    }
+
+    const topbarAvatar = document.getElementById('topbar-avatar');
+    const sidebarAvatar = document.getElementById('sidebar-avatar');
+    if (topbarAvatar) topbarAvatar.textContent = initials;
+    if (sidebarAvatar) sidebarAvatar.textContent = initials;
+
+  } catch (e) {
+    console.error("Không thể tải thông tin bác sĩ từ localStorage:", e);
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id') || 'LH00123';
+  const patient = MB_MOCK.appointments.find((a) => a.id === id) || MB_MOCK.appointments[0];
+
+  if (patient) {
+    if (patient.status === 'waiting') {
+      patient.status = 'in-progress';
+      showToast('🩺 Đã check-in thành công. Trạng thái ca khám chuyển sang: Đang khám', 'info', 2500);
+    }
+
+    document.getElementById('p-id').textContent = patient.id;
+    document.getElementById('p-name').textContent = patient.name;
+    document.getElementById('p-age').textContent = patient.age + ' / ' + patient.gender;
+
+    const phone = patient.phone || '0912345678';
+    const email = patient.email || 'patient@example.com';
+    document.getElementById('p-contact').textContent = phone + ' • ' + email;
+    document.getElementById('p-symptom').textContent = patient.symptom;
+
+    const statusEl = document.getElementById('patient-status');
+    const statusMap = {
+      waiting: ['badge-waiting', 'Chờ khám'],
+      'in-progress': ['badge-progress', 'Đang khám'],
+      completed: ['badge-completed', 'Đã hoàn thành'],
+      cancelled: ['badge-cancelled', 'Đã hủy']
+    };
+    const [cls, txt] = statusMap[patient.status] || ['badge-progress', 'Đang khám'];
+    statusEl.className = 'badge-status ' + cls;
+    statusEl.textContent = txt;
+  }
+
+  const tbody = document.getElementById('prescription-list-body');
+  const DRAFT_KEY = 'medbooking_draft_' + id;
+
+  function setError(field, message) {
+    const errEl = document.querySelector(`[data-error="${field}"]`);
+    if (errEl) errEl.textContent = message || '';
+    const input = document.querySelector(`[data-field="${field}"]`);
+    if (input) input.classList.toggle('error', !!message);
+  }
+  function clearAllErrors() {
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+    document.querySelectorAll('.form-control.error').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('tr.row-error').forEach(el => el.classList.remove('row-error'));
+  }
+
+  function bindCharCounter(textarea) {
+    const counter = document.querySelector(`.char-counter[data-for="${textarea.id}"]`);
+    if (!counter) return;
+    const min = parseInt(textarea.dataset.min) || 0;
+    function update() {
+      const len = textarea.value.trim().length;
+      counter.textContent = `${len} / ${min} ký tự tối thiểu`;
+      counter.classList.remove('warn', 'ok');
+      if (len === 0) counter.classList.remove('warn', 'ok');
+      else if (len < min) counter.classList.add('warn');
+      else counter.classList.add('ok');
+    }
+    textarea.addEventListener('input', update);
+    update();
+  }
+  document.querySelectorAll('textarea[data-min]').forEach(bindCharCounter);
+
+  function renumber() {
+    [...tbody.querySelectorAll('tr')].forEach((tr, i) => {
+      tr.querySelector('td:first-child').textContent = i + 1;
+    });
+  }
+  function bindRow(row) {
+    row.querySelector('.btn-danger').addEventListener('click', () => {
+      row.remove();
+      renumber();
+      validateMedicines();
+      showToast('Đã xóa thuốc', 'warning', 1500);
+    });
+    row.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('blur', () => validateMedicines());
+    });
+  }
+  function addRow(name = '', dose = '', qty = 1) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td></td>
+      <td><input type="text" class="form-control med-name" value="${name}" placeholder="Tên thuốc..."></td>
+      <td><input type="text" class="form-control med-dose" value="${dose}" placeholder="Liều lượng, cách dùng..."></td>
+      <td><input type="number" class="form-control med-qty" value="${qty}" min="1" max="100"></td>
+      <td><button type="button" class="btn btn-danger btn-icon"><i class="fas fa-trash"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+    bindRow(tr);
+    renumber();
+  }
+
+  const draft = MB_STORAGE.get(DRAFT_KEY, null);
+  if (draft) {
+    document.getElementById('clinical-notes').value = draft.clinical || '';
+    document.getElementById('diagnosis-result').value = draft.diagnosis || '';
+    document.getElementById('doctor-advice').value = draft.advice || '';
+    (draft.medicines || []).forEach((m) => addRow(m.name, m.dose, m.qty));
+
+    if (draft.devices && Array.isArray(draft.devices)) {
+      document.querySelectorAll('input[name="medical_device"]').forEach(cb => {
+        cb.checked = draft.devices.includes(cb.value);
+      });
+    }
+
+    if (draft.recheck && draft.recheck.required) {
+      document.getElementById('recheck-required').checked = true;
+      document.getElementById('recheck-panel').classList.add('show');
+      document.getElementById('recheck-date').value = draft.recheck.date || '';
+      document.getElementById('recheck-session').value = draft.recheck.session || 'morning';
+      document.getElementById('recheck-note').value = draft.recheck.note || '';
+    }
+    showToast('Đã khôi phục bản nháp', 'info', 2000);
+  } else {
+    addRow('Betaserc 16mg', 'Ngày uống 2 lần, sáng/chiều sau ăn mỗi lần 1 viên', 30);
+  }
+  document.querySelectorAll('textarea[data-min]').forEach(t => t.dispatchEvent(new Event('input')));
+
+  document.getElementById('btn-add-medicine').addEventListener('click', () => {
+    addRow();
+    showToast('Đã thêm thuốc mới', 'success', 1200);
+  });
+
+  const recheckCb = document.getElementById('recheck-required');
+  const recheckPanel = document.getElementById('recheck-panel');
+  const recheckDate = document.getElementById('recheck-date');
+
+  const today = new Date();
+  const minDate = new Date(today);
+  minDate.setDate(minDate.getDate() + 1);
+  recheckDate.min = minDate.toISOString().split('T')[0];
+
+  const defaultDate = new Date(today);
+  defaultDate.setDate(defaultDate.getDate() + 7);
+  recheckDate.value = defaultDate.toISOString().split('T')[0];
+
+  recheckCb.addEventListener('change', () => {
+    recheckPanel.classList.toggle('show', recheckCb.checked);
+    if (!recheckCb.checked) setError('recheckDate', '');
+  });
+
+  function validateClinical() {
+    const v = document.getElementById('clinical-notes').value.trim();
+    if (v.length < 10) { setError('clinical', 'Vui lòng nhập tối thiểu 10 ký tự mô tả kết quả khám.'); return false; }
+    setError('clinical', ''); return true;
+  }
+  function validateDiagnosis() {
+    const v = document.getElementById('diagnosis-result').value.trim();
+    if (v.length < 5) { setError('diagnosis', 'Vui lòng nhập chẩn đoán bệnh (tối thiểu 5 ký tự).'); return false; }
+    setError('diagnosis', ''); return true;
+  }
+  function validateAdvice() {
+    const v = document.getElementById('doctor-advice').value.trim();
+    if (v.length < 10) { setError('advice', 'Vui lòng nhập lời dặn cho bệnh nhân (tối thiểu 10 ký tự).'); return false; }
+    setError('advice', ''); return true;
+  }
+  function validateMedicines() {
+    const rows = [...tbody.querySelectorAll('tr')];
+    let hasError = false;
+    let firstErrorInput = null;
+    if (!rows.length) { setError('medicines', 'Đơn thuốc phải có ít nhất 1 loại thuốc.'); return false; }
+    rows.forEach((tr) => {
+      const name = tr.querySelector('.med-name').value.trim();
+      const dose = tr.querySelector('.med-dose').value.trim();
+      const qty = parseInt(tr.querySelector('.med-qty').value);
+      let rowErr = false;
+      tr.classList.remove('row-error');
+      if (!name) { rowErr = true; if (!firstErrorInput) firstErrorInput = tr.querySelector('.med-name'); }
+      if (dose.length < 10) { rowErr = true; if (!firstErrorInput) firstErrorInput = tr.querySelector('.med-dose'); }
+      if (isNaN(qty) || qty < 1 || qty > 100) { rowErr = true; if (!firstErrorInput) firstErrorInput = tr.querySelector('.med-qty'); }
+      if (rowErr) { tr.classList.add('row-error'); hasError = true; }
+    });
+    if (hasError) {
+      setError('medicines', 'Vui lòng kiểm tra lại các dòng thuốc bị lỗi (tên, liều lượng ≥ 10 ký tự, số lượng 1-100).');
+      if (firstErrorInput) firstErrorInput.focus();
+      return false;
+    }
+    setError('medicines', ''); return true;
+  }
+  function validateRecheck() {
+    if (!recheckCb.checked) { setError('recheckDate', ''); return true; }
+    const d = recheckDate.value;
+    if (!d) { setError('recheckDate', 'Vui lòng chọn ngày tái khám.'); return false; }
+    const selected = new Date(d);
+    const min = new Date(); min.setHours(0,0,0,0); min.setDate(min.getDate() + 1);
+    if (selected < min) { setError('recheckDate', 'Ngày tái khám phải từ ngày mai trở đi.'); return false; }
+    setError('recheckDate', ''); return true;
+  }
+
+  function getSelectedDevices() {
+    return [...document.querySelectorAll('input[name="medical_device"]:checked')].map(el => el.value);
+  }
+
+  document.getElementById('clinical-notes').addEventListener('blur', validateClinical);
+  document.getElementById('diagnosis-result').addEventListener('blur', validateDiagnosis);
+  document.getElementById('doctor-advice').addEventListener('blur', validateAdvice);
+  recheckDate.addEventListener('blur', validateRecheck);
+
+  document.getElementById('btn-save-draft').addEventListener('click', () => {
+    const medicines = [...tbody.querySelectorAll('tr')].map((tr) => ({
+      name: tr.querySelector('.med-name').value,
+      dose: tr.querySelector('.med-dose').value,
+      qty: parseInt(tr.querySelector('.med-qty').value) || 1
+    }));
+    MB_STORAGE.set(DRAFT_KEY, {
+      clinical: document.getElementById('clinical-notes').value,
+      devices: getSelectedDevices(),
+      diagnosis: document.getElementById('diagnosis-result').value,
+      advice: document.getElementById('doctor-advice').value,
+      medicines,
+      recheck: {
+        required: recheckCb.checked,
+        date: recheckDate.value,
+        session: document.getElementById('recheck-session').value,
+        note: document.getElementById('recheck-note').value
+      },
+      savedAt: new Date().toISOString()
+    });
+    showToast('💾 Đã lưu nháp bệnh án', 'success', 2000);
+  });
+
+  document.getElementById('btn-complete-examination').addEventListener('click', async () => {
+    clearAllErrors();
+
+    const okClinical = validateClinical();
+    const okDiagnosis = validateDiagnosis();
+    const okMedicines = validateMedicines();
+    const okAdvice = validateAdvice();
+    const okRecheck = validateRecheck();
+
+    if (!okClinical || !okDiagnosis || !okMedicines || !okAdvice || !okRecheck) {
+      showToast('⚠️ Vui lòng kiểm tra lại các trường được đánh dấu đỏ', 'error', 3000);
+      const firstErr = document.querySelector('.form-control.error, tr.row-error');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const medicines = [...tbody.querySelectorAll('tr')].map((tr) => ({
+      name: tr.querySelector('.med-name').value.trim(),
+      dose: tr.querySelector('.med-dose').value.trim(),
+      qty: parseInt(tr.querySelector('.med-qty').value) || 1
+    }));
+
+    const diagnosis = document.getElementById('diagnosis-result').value.trim();
+    const clinical = document.getElementById('clinical-notes').value.trim();
+    const advice = document.getElementById('doctor-advice').value.trim();
+    const devices = getSelectedDevices();
+
+    const idx = MB_MOCK.appointments.findIndex((a) => a.id === id);
+    if (idx >= 0) {
+      MB_MOCK.appointments[idx].status = 'completed';
+      MB_MOCK.appointments[idx].devices = devices;
+    }
+
+    let smsEmailSent = false;
+    if (recheckCb.checked) {
+      const patientPhone = (patient && patient.phone) || '0912345678';
+      const patientEmail = (patient && patient.email) || 'patient@example.com';
+
+      const recheckData = {
+        patient_name: patient ? patient.name : 'Bệnh nhân',
+        patient_phone: patientPhone,
+        patient_email: patientEmail,
+        doctor_name: currentDoctorName,
+        doctor_specialty: 'Nội Tổng Quát',
+        diagnosis: diagnosis,
+        clinical_notes: clinical,
+        devices: devices,
+        advice: advice,
+        suggested_date: recheckDate.value,
+        suggested_session: document.getElementById('recheck-session').value,
+        note: document.getElementById('recheck-note').value.trim()
+      };
+
+      try {
+        showToast('📤 Đang gửi SMS + Email cho bệnh nhân...', 'info', 2000);
+
+        const response = await fetch('/api/send-recheck-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(recheckData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          smsEmailSent = true;
+          const channels = [];
+          if (result.results && result.results.sms) channels.push('SMS');
+          if (result.results && result.results.email) channels.push('Email');
+          showToast('📩 Đã gửi thông báo tái khám qua ' + channels.join(' + '), 'success', 3000);
+        } else {
+          showToast('⚠️ Không gửi được thông báo: ' + (result.message || 'Lỗi không xác định'), 'warning', 3000);
+        }
+      } catch (err) {
+        console.error('Send notification error:', err);
+        showToast('⚠️ Không kết nối được server gửi thông báo', 'error', 3000);
+      }
+    }
+
+    MB_STORAGE.remove(DRAFT_KEY);
+
+    const statusEl = document.getElementById('patient-status');
+    statusEl.className = 'badge-status badge-completed';
+    statusEl.textContent = 'Đã hoàn thành';
+
+    if (!recheckCb.checked || smsEmailSent) {
+      showToast('✅ Đã hoàn thành ca khám & gửi đơn thuốc', 'success', 3000);
+    }
+
+    setTimeout(() => {
+      window.location.href = 'danh_sach_ca_kham.html';
+    }, 2500);
+  });
+
+  const btnNotify = document.getElementById('btn-notify');
+  const notifyDropdown = document.getElementById('notification-dropdown');
+  const badgeDot = btnNotify.querySelector('.badge');
+
+  btnNotify.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userDropdown.classList.remove('active');
+    notifyDropdown.classList.toggle('active');
+  });
+
+  const userMenuBtn = document.getElementById('user-menu-btn');
+  const userDropdown = document.getElementById('user-dropdown');
+
+  userMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifyDropdown.classList.remove('active');
+    userDropdown.classList.toggle('active');
+  });
+
+  document.addEventListener('click', () => {
+    notifyDropdown.classList.remove('active');
+    userDropdown.classList.remove('active');
+  });
+
+  document.getElementById('mark-all-read').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(badgeDot) badgeDot.style.display = 'none';
+    notifyDropdown.classList.remove('active');
+    if(typeof showToast === 'function') {
+      showToast('Đã đánh dấu tất cả thông báo là đã đọc', 'success', 2000);
+    }
+  });
+};
+</script>
+</body>
+</html>

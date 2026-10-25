@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedBooking - Cổng thông tin & Đặt lịch khám bệnh</title>
+    <!-- Favicon chuẩn hình trái tim hồng sóng điện tim -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-pink: #FF6B9D;
+            --primary-pink-dark: #E84A7F;
+            --primary-pink-light: #FFE4EC;
+            --secondary-color: #2D3436;
+            --text-gray: #636E72;
+            --bg-body: #FFF9FA;
+            --bg-card: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.5);
+            --shadow-soft: 0 10px 30px rgba(255, 107, 157, 0.1);
+            --shadow-hover: 0 15px 40px rgba(255, 107, 157, 0.25);
+            --border-radius: 20px;
+            --input-bg: #ffffff;
+            --input-border: #FFD1DC;
+            --star-color: #FFC107;
+        }
+
+        [data-theme="dark"] {
+            --primary-pink: #FF85A2;
+            --primary-pink-dark: #FF6B9D;
+            --primary-pink-light: #3A2A30;
+            --secondary-color: #F5F5F5;
+            --text-gray: #B0B0B0;
+            --bg-body: #1A1114;
+            --bg-card: #2A1F23;
+            --bg-glass: rgba(42, 31, 35, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 15px 40px rgba(255, 107, 157, 0.15);
+            --input-bg: #3A2A30;
+            --input-border: #5A3A45;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--secondary-color);
+            background-color: var(--bg-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: var(--secondary-color); }
+        a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+        ul { list-style: none; }
+
+        /* =========================================
+            HEADER
+            ========================================= */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .logo-container:hover { transform: scale(1.02); }
+
+        .logo-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, var(--primary-pink), #ff8fab);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 24px;
+            box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .logo-icon i { animation: heartbeat 1.5s ease-in-out infinite; z-index: 2; }
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.15); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.15); }
+            70% { transform: scale(1); }
+        }
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+            animation: shine 3s infinite linear;
+        }
+        @keyframes shine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            color: var(--primary-pink);
+            letter-spacing: 1px;
+            margin-bottom: -5px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(255, 107, 157, 0.1);
+        }
+        .logo-text p {
+            font-size: 10px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 30px; }
+        nav ul { display: flex; gap: 25px; }
+        nav ul li a {
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--secondary-color);
+            position: relative;
+        }
+        nav ul li a:hover, nav ul li a strong { color: var(--primary-pink); }
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 0;
+            width: 0; height: 2px;
+            background: var(--primary-pink);
+            transition: width 0.3s;
+        }
+        nav ul li a:hover::after { width: 100%; }
+
+        .theme-toggle {
+            background: var(--primary-pink-light);
+            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-pink);
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        .theme-toggle:hover {
+            background: var(--primary-pink);
+            color: #fff;
+            transform: rotate(15deg);
+        }
+
+        /* =========================================
+            HERO SECTION
+            ========================================= */
+        section:first-of-type {
+            background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 228, 236, 0.4)), url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 75vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            border-radius: 0 0 40px 40px;
+            margin-bottom: 40px;
+        }
+
+        [data-theme="dark"] section:first-of-type {
+            background: linear-gradient(rgba(26, 17, 20, 0.8), rgba(42, 31, 35, 0.8)), url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        section:first-of-type > div {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            padding: 50px 40px;
+            border-radius: 30px;
+            max-width: 750px;
+            color: var(--secondary-color);
+            box-shadow: var(--shadow-soft);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        section:first-of-type h2 {
+            font-size: 42px;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        section:first-of-type p {
+            font-size: 17px;
+            margin-bottom: 30px;
+            color: var(--text-gray);
+        }
+        section:first-of-type button {
+            background: var(--primary-pink);
+            color: #fff;
+            border: none;
+            padding: 15px 45px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(255, 107, 157, 0.3);
+            font-family: 'Poppins', sans-serif;
+        }
+        section:first-of-type button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 107, 157, 0.4);
+            background: var(--primary-pink-dark);
+        }
+
+        /* =========================================
+            SEARCH BAR (STYLE AKINA)
+            ========================================= */
+        .search-section {
+            max-width: 1100px;
+            margin: -80px auto 60px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 60px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            z-index: 10;
+            border: 1px solid var(--border-glass);
+            overflow: hidden;
+        }
+
+        .search-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        [data-theme="dark"] .search-section::before { opacity: 0.05; }
+
+        .search-section h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: var(--primary-pink);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .search-form .form-group {
+            flex: 1;
+            min-width: 180px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-form label {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-left: 15px;
+        }
+
+        .search-form select,
+        .search-form input {
+            padding: 12px 20px;
+            border: 1px solid var(--input-border);
+            border-radius: 30px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            background: var(--input-bg);
+            transition: all 0.3s;
+            outline: none;
+            width: 100%;
+            color: var(--secondary-color);
+        }
+
+        .search-form select:focus,
+        .search-form input:focus {
+            border-color: var(--primary-pink);
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
+        }
+
+        .search-form button {
+            background: var(--primary-pink);
+            color: #fff;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            height: 48px;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .search-form button:hover {
+            background: var(--primary-pink-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        /* =========================================
+            SECTION TITLE
+            ========================================= */
+        .section-title {
+            text-align: center;
+            font-size: 34px;
+            margin-bottom: 50px;
+            position: relative;
+            color: var(--secondary-color);
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: var(--primary-pink);
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+
+        /* =========================================
+            BÁC SĨ NỔI BẬT
+            ========================================= */
+        .featured-section {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+        }
+
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+        }
+
+        .doctor-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-pink-light);
+        }
+
+        .doctor-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-pink-light), transparent);
+            z-index: 0;
+        }
+
+        .doctor-avatar {
+            width: 110px; height: 110px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background-size: cover;
+            background-position: center;
+            border: 4px solid var(--bg-card);
+            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.25);
+            position: relative;
+            z-index: 1;
+        }
+
+        .doctor-card h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        .doctor-card h3 a { color: var(--secondary-color); }
+        .doctor-card h3 a:hover { color: var(--primary-pink); }
+
+        .doctor-specialty {
+            display: inline-block;
+            background: var(--primary-pink-light);
+            color: var(--primary-pink);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .doctor-rating {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .doctor-rating .stars { color: var(--star-color); }
+        .doctor-rating .score { font-weight: 700; color: var(--secondary-color); }
+        .doctor-rating .count { color: var(--text-gray); font-size: 12px; }
+
+        .doctor-exp {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-glass);
+        }
+        .doctor-exp i { color: var(--primary-pink); }
+
+        .doctor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .doctor-actions .btn {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 13px;
+            justify-content: center;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-view-profile {
+            background: transparent;
+            border: 1px solid var(--primary-pink);
+            color: var(--primary-pink);
+        }
+        .btn-view-profile:hover {
+            background: var(--primary-pink);
+            color: #fff;
+        }
+
+        .btn-book-now {
+            background: var(--primary-pink);
+            color: #fff;
+            border: none;
+        }
+        .btn-book-now:hover {
+            background: var(--primary-pink-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+        }
+
+        /* Phân trang */
+        .pagination-wrapper {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .pagination-wrapper p {
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .pagination {
+            display: inline-flex;
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+        .pagination button {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            margin: 0 3px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-glass);
+            color: var(--text-gray);
+            background: var(--bg-card);
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .pagination button:hover {
+            background: var(--primary-pink);
+            color: white;
+            border-color: var(--primary-pink);
+            transform: scale(1.1);
+        }
+        .pagination button.active {
+            background: var(--primary-pink);
+            color: #fff;
+            border-color: var(--primary-pink);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+        }
+
+        .btn-view-all {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--secondary-color);
+            color: var(--bg-body);
+            border: none;
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-view-all:hover {
+            background: var(--primary-pink);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 157, 0.3);
+        }
+
+        /* =========================================
+            TRIỆU CHỨNG NỔI BẬT
+            ========================================= */
+        .symptoms-section {
+            max-width: 1200px;
+            margin: 0 auto 80px;
+            padding: 50px 40px;
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+        }
+
+        .symptoms-section h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 40px;
+            color: var(--primary-pink);
+        }
+
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .symptom-item {
+            background: var(--bg-body);
+            padding: 20px 25px;
+            border-radius: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary-pink-light);
+        }
+
+        .symptom-item:hover {
+            transform: translateX(5px);
+            background: var(--bg-card);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.15);
+            border-left-color: var(--primary-pink);
+        }
+
+        .symptom-item strong {
+            color: var(--primary-pink);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        .symptom-item span {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        /* =========================================
+            FOOTER
+            ========================================= */
+        footer {
+            background: #2D3436;
+            color: #fff;
+            padding: 80px 5% 40px;
+            border-radius: 40px 40px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        [data-theme="dark"] footer { background: #150D10; }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+            opacity: 0.05;
+            z-index: 0;
+        }
+
+        footer > div {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        footer > div:first-child {
+            text-align: center;
+            margin-bottom: 60px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        footer h3 { color: #fff; font-size: 28px; margin-bottom: 20px; }
+        footer p { color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 15px; }
+        footer strong {
+            color: var(--primary-pink);
+            font-style: italic;
+            display: block;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        footer > div:nth-child(2), 
+        footer > div:nth-child(3) {
+            display: inline-block;
+            vertical-align: top;
+            width: 45%;
+            margin-right: 4%;
+            margin-bottom: 40px;
+        }
+        footer > div:nth-child(3) { margin-right: 0; }
+
+        footer h4 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        footer ul li { margin-bottom: 10px; }
+        footer ul li a { color: rgba(255,255,255,0.7); }
+        footer ul li a:hover { color: var(--primary-pink); padding-left: 5px; }
+
+        footer > div:last-child {
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            font-size: 12px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .footer-logo .logo-icon {
+            background: white;
+            color: var(--primary-pink);
+            box-shadow: none;
+            width: 45px; height: 45px;
+            font-size: 20px;
+        }
+        .footer-logo .logo-text h1 { color: white; font-size: 22px; }
+        .footer-logo .logo-text p { color: #aaa; font-size: 9px; }
+
+        /* =========================================
+            RESPONSIVE
+            ========================================= */
+        @media (max-width: 900px) {
+            header {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+            }
+            .header-right {
+                flex-direction: column;
+                gap: 15px;
+                width: 100%;
+            }
+            nav ul {
+                margin-top: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            section:first-of-type h2 { font-size: 30px; }
+            .search-section {
+                margin-top: -50px;
+                padding: 20px;
+                border-radius: 20px;
+            }
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-form button {
+                width: 100%;
+                justify-content: center;
+                margin-top: 10px;
+            }
+            footer > div:nth-child(2), 
+            footer > div:nth-child(3) {
+                width: 100%;
+                margin-right: 0;
+            }
+            .logo-container { gap: 8px; }
+            .logo-icon { width: 40px; height: 40px; font-size: 18px; }
+            .logo-text h1 { font-size: 20px; }
+            .logo-text p { font-size: 8px; }
+            .symptoms-section { padding: 30px 20px; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. HEADER -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Chăm sóc sức khỏe toàn diện</p>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/benh_nhan/home_bn.html"><strong>Trang chủ</strong></a></li>
+                    <li><a href="/benh_nhan/danh_sach_bac_si.html">Tìm kiếm Bác sĩ</a></li>
+                    <li><a href="/benh_nhan/dat_lich.html">Đặt lịch khám</a></li>
+                    <li><a href="/benh_nhan/danh_sach_lich_hen.html">Lịch hẹn của tôi</a></li>
+                    <li><a href="/benh_nhan/ho_so_ca_nhan.html">Hồ sơ cá nhân</a></li>
+                    <li><a href="/dk_dn/dn.html">Đăng xuất</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi chế độ Sáng/Tối">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. HERO SECTION -->
+    <section>
+        <div>
+            <h2>Hệ thống Đặt lịch Khám bệnh Trực tuyến MedBooking</h2>
+            <p>Kết nối nhanh chóng với các chuyên gia, bác sĩ đầu ngành tại Hà Nội. Chủ động thời gian, giảm thiểu chờ đợi, chăm sóc sức khỏe thông minh cho cả gia đình.</p>
+            <a href="dat_lich.html"><button type="button">Đặt lịch khám ngay</button></a>
+        </div>
+    </section>
+
+    <!-- 3. SEARCH BAR -->
+    <section class="search-section">
+        <h2>Tra cứu & Tìm kiếm Nhanh Bác sĩ</h2>
+        <form action="danh_sach_bac_si.html" method="GET" class="search-form">
+            <div class="form-group">
+                <label for="search-spec">Chuyên khoa:</label>
+                <select id="search-spec" name="specialty">
+                    <option value="">-- Tất cả chuyên khoa --</option>
+                    <option value="noi">1. Nội Tổng Quát</option>
+                    <option value="tim-mach">2. Tim Mạch</option>
+                    <option value="nhi">3. Nhi Khoa</option>
+                    <option value="than-kinh">4. Thần Kinh</option>
+                    <option value="xuong-khop">5. Cơ Xương Khớp</option>
+                    <option value="da-lieu">6. Da Liễu</option>
+                    <option value="tai-mui-hong">7. Tai Mũi Họng</option>
+                    <option value="mat">8. Mắt</option>
+                    <option value="rang-ham-mat">9. Răng Hàm Mặt</option>
+                    <option value="y-hoc-co-truyen">10. Y Học Cổ Truyền</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="search-rating">Đánh giá:</label>
+                <select id="search-rating" name="rating">
+                    <option value="">-- Tất cả mức rating --</option>
+                    <option value="4.5">Từ 4.5 sao trở lên</option>
+                    <option value="4.0">Từ 4.0 sao trở lên</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="search-exp">Kinh nghiệm:</label>
+                <select id="search-exp" name="experience">
+                    <option value="">-- Tất cả kinh nghiệm --</option>
+                    <option value="5">Trên 5 năm</option>
+                    <option value="10">Trên 10 năm</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="search-keyword">Từ khóa / Triệu chứng:</label>
+                <input type="text" id="search-keyword" name="keyword" placeholder="Nhập triệu chứng...">
+            </div>
+            <div>
+                <button type="submit"><i class="fas fa-search"></i> Tìm kiếm</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- 4. BÁC SĨ NỔI BẬT -->
+    <section class="featured-section">
+        <h2 class="section-title"> Bác sĩ Nổi bật & Tiêu biểu</h2>
+        
+        <div class="doctors-grid">
+            <!-- Bác sĩ 1 -->
+            <div class="doctor-card">
+                <div class="doctor-avatar" style="background-image: url('https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80');"></div>
+                <h3><a href="chi_tiet_bac_si.html?id=bs01">ThS.BS Nguyễn Văn A</a></h3>
+                <span class="doctor-specialty">Nội Tổng Quát</span>
+                <div class="doctor-rating">
+                    <span class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </span>
+                    <span class="score">4.9</span>
+                    <span class="count">(120 đánh giá)</span>
+                </div>
+                <p class="doctor-exp"><i class="fas fa-briefcase"></i> Kinh nghiệm: 12 năm</p>
+                <div class="doctor-actions">
+                    <a href="chi_tiet_bac_si.html?id=bs01" style="flex:1;">
+                        <button class="btn btn-view-profile">Xem chi tiết</button>
+                    </a>
+                    <a href="dat_lich.html?doctor_id=bs01" style="flex:1;">
+                        <button class="btn btn-book-now">Đặt lịch</button>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bác sĩ 2 -->
+            <div class="doctor-card">
+                <div class="doctor-avatar" style="background-image: url('https://images.unsplash.com/photo-1594824476967-48c8b964273f?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80');"></div>
+                <h3><a href="chi_tiet_bac_si.html?id=bs02">BS.CKI Trần Thị C</a></h3>
+                <span class="doctor-specialty">Tim Mạch</span>
+                <div class="doctor-rating">
+                    <span class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </span>
+                    <span class="score">4.8</span>
+                    <span class="count">(98 đánh giá)</span>
+                </div>
+                <p class="doctor-exp"><i class="fas fa-briefcase"></i> Kinh nghiệm: 10 năm</p>
+                <div class="doctor-actions">
+                    <a href="chi_tiet_bac_si.html?id=bs02" style="flex:1;">
+                        <button class="btn btn-view-profile">Xem chi tiết</button>
+                    </a>
+                    <a href="dat_lich.html?doctor_id=bs02" style="flex:1;">
+                        <button class="btn btn-book-now">Đặt lịch</button>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bác sĩ 3 -->
+            <div class="doctor-card">
+                <div class="doctor-avatar" style="background-image: url('https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80');"></div>
+                <h3><a href="chi_tiet_bac_si.html?id=bs03">TS.BS Lê Hoàng D</a></h3>
+                <span class="doctor-specialty">Thần Kinh</span>
+                <div class="doctor-rating">
+                    <span class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </span>
+                    <span class="score">5.0</span>
+                    <span class="count">(150 đánh giá)</span>
+                </div>
+                <p class="doctor-exp"><i class="fas fa-briefcase"></i> Kinh nghiệm: 18 năm</p>
+                <div class="doctor-actions">
+                    <a href="chi_tiet_bac_si.html?id=bs03" style="flex:1;">
+                        <button class="btn btn-view-profile">Xem chi tiết</button>
+                    </a>
+                    <a href="dat_lich.html?doctor_id=bs03" style="flex:1;">
+                        <button class="btn btn-book-now">Đặt lịch</button>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bác sĩ 4 -->
+            <div class="doctor-card">
+                <div class="doctor-avatar" style="background-image: url('https://images.unsplash.com/photo-1537368910025-700350fe46c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80');"></div>
+                <h3><a href="chi_tiet_bac_si.html?id=bs04">BS.CKII Phạm Văn E</a></h3>
+                <span class="doctor-specialty">Cơ Xương Khớp</span>
+                <div class="doctor-rating">
+                    <span class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </span>
+                    <span class="score">4.7</span>
+                    <span class="count">(85 đánh giá)</span>
+                </div>
+                <p class="doctor-exp"><i class="fas fa-briefcase"></i> Kinh nghiệm: 15 năm</p>
+                <div class="doctor-actions">
+                    <a href="chi_tiet_bac_si.html?id=bs04" style="flex:1;">
+                        <button class="btn btn-view-profile">Xem chi tiết</button>
+                    </a>
+                    <a href="dat_lich.html?doctor_id=bs04" style="flex:1;">
+                        <button class="btn btn-book-now">Đặt lịch</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân trang -->
+        <div class="pagination-wrapper">
+            <p>Trang bác sĩ nổi bật:</p>
+            <div class="pagination">
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button>4</button>
+            </div>
+            <br>
+            <a href="danh_sach_bac_si.html">
+                <button class="btn-view-all">
+                    <i class="fas fa-users"></i> Xem thêm tất cả bác sĩ
+                </button>
+            </a>
+        </div>
+    </section>
+
+    <!-- 5. TRIỆU CHỨNG NỔI BẬT -->
+    <section class="symptoms-section">
+        <h2>10 Chuyên khoa Y tế & Triệu chứng Phổ biến</h2>
+        <div class="symptoms-grid">
+            <div class="symptom-item">
+                <strong>1. Nội Tổng Quát</strong>
+                <span>Sốt, mệt mỏi, sụt cân, đau tức ngực, khó thở...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>2. Tim Mạch</strong>
+                <span>Đau thắt ngực, hồi hộp, huyết áp cao, chóng mặt...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>3. Nhi Khoa</strong>
+                <span>Trẻ sốt cao, ho có đờm, biếng ăn, rối loạn tiêu hóa...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>4. Thần Kinh</strong>
+                <span>Đau đầu kinh niên, mất ngủ, tê bì chân tay, sa sút...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>5. Cơ Xương Khớp</strong>
+                <span>Đau lưng, mỏi cổ vai gáy, cứng khớp buổi sáng...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>6. Da Liễu</strong>
+                <span>Phát ban, mụn trứng cá nặng, mẩn ngứa, viêm da...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>7. Tai Mũi Họng</strong>
+                <span>Đau rát họng, ù tai, nghẹt mũi, viêm xoang kéo dài...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>8. Mắt</strong>
+                <span>Mờ mắt, nhức mỏi mắt, khô rát, cộm mắt...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>9. Răng Hàm Mặt</strong>
+                <span>Đau răng, sâu răng, viêm lợi, chảy máu chân răng...</span>
+            </div>
+            <div class="symptom-item">
+                <strong>10. Y Học Cổ Truyền</strong>
+                <span>Bồi bổ cơ thể, châm cứu, điều hòa khí huyết...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. FOOTER -->
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Chăm sóc sức khỏe toàn diện</p>
+                </div>
+            </div>
+            <p>Nền tảng công nghệ y tế kết nối người bệnh với các bệnh viện và phòng khám uy tín hàng đầu. Cam kết quy trình nhanh gọn, minh bạch chi phí và bảo mật thông tin tuyệt đối.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào, bình an và hạnh phúc!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="home_bn.html">Trang chủ</a></li>
+                <li><a href="danh_sach_bac_si.html">Tìm kiếm Bác sĩ</a></li>
+                <li><a href="dat_lich.html">Đặt lịch khám</a></li>
+                <li><a href="danh_sach_lich_hen.html">Lịch hẹn cá nhân</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ & Địa chỉ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/BN_Store.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme Toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

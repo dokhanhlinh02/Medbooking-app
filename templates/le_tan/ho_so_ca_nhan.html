@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBOOKING - Hồ sơ Lễ tân</title>
+    <!-- Favicon chuẩn hình trái tim xanh dương -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="../../static/css/LT_BS.css">
+    
+    <style>
+        main { max-width: 1100px; margin: 30px auto 80px; padding: 0 20px; }
+
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-blue), #6FB1F5);
+            border-radius: var(--border-radius);
+            padding: 35px;
+            color: #fff;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -20%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .profile-avatar {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(10px);
+            border: 4px solid rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 40px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-info { position: relative; z-index: 1; }
+        .profile-info h2 { color: #fff; font-size: 26px; margin-bottom: 5px; }
+        .profile-info p { color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 10px; }
+
+        .profile-info .badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .profile-info .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .btn-submit {
+            background: var(--primary-blue);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-blue-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-submit.btn-secondary {
+            background: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-submit.btn-secondary:hover {
+            background: var(--primary-blue);
+            color: #fff;
+        }
+
+        /* Nút đăng xuất đồng bộ */
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EF4444;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover {
+            background: #EF4444;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 900px) {
+            .profile-grid { grid-template-columns: 1fr; }
+            .profile-header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Cổng Lễ Tân</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/le_tan/dashboard.html">Tổng quan</a></li>
+                    <li><a href="/le_tan/quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                    <li><a href="/le_tan/danh_sach_lich_hen.html">Danh sách ca trực</a></li>
+                    <li><a href="/le_tan/check_in.html">Check-in</a></li>
+                    <li><a href="/le_tan/vien_phi.html">Viện phí</a></li>
+                </ul>
+            </nav>
+            <div class="user-badge" onclick="window.location.href='ho_so_ca_nhan.html'">
+                <div class="user-avatar" id="topbar-avatar">LT</div>
+                <div class="user-info-text">
+                    <div class="user-name" id="topbar-receptionist-name">Lễ tân</div>
+                    <div class="user-role">Lễ tân</div>
+                </div>
+            </div>
+            <!-- Nút chuyển giao diện sáng/tối -->
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi giao diện">
+                <i class="fas fa-moon"></i>
+            </button>
+            <!-- Nút Đăng xuất nằm cạnh nút giao diện -->
+            <button class="logout-btn" onclick="window.location.href='../dk_dn/dn.html'" title="Đăng xuất">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Hồ sơ cá nhân</span>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar-large">LT</div>
+            <div class="profile-info">
+                <h2 id="profile-name">Lễ tân</h2>
+                <p><i class="fas fa-envelope"></i> <span id="profile-email">letan@medbooking.vn</span> • <i class="fas fa-phone"></i> <span id="profile-phone">0912345678</span></p>
+                <div class="badges">
+                    <span class="badge"><i class="fas fa-id-badge"></i> Mã NV: <span id="profile-id">LT8801</span></span>
+                    <span class="badge"><i class="fas fa-user-tie"></i> Lễ tân</span>
+                    <span class="badge"><i class="fas fa-calendar-alt"></i> Tham gia: 01/03/2023</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Personal info -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-circle"></i> Thông tin cá nhân</h3>
+                </div>
+                <form onsubmit="event.preventDefault(); updateInfo();">
+                    <div class="form-group">
+                        <label for="fullname">Họ và tên</label>
+                        <input type="text" id="fullname" value="Lễ tân">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email công việc</label>
+                        <input type="email" id="email" value="letan@medbooking.vn">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại</label>
+                        <input type="tel" id="phone" value="0912345678">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Địa chỉ</label>
+                        <input type="text" id="address" value="Hà Nội, Việt Nam">
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Cập nhật thông tin</button>
+                </form>
+            </div>
+
+            <!-- Change password -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-shield-alt"></i> Đổi mật khẩu</h3>
+                </div>
+                <form onsubmit="event.preventDefault(); changePassword();">
+                    <div class="form-group">
+                        <label for="current-pass">Mật khẩu hiện tại</label>
+                        <input type="password" id="current-pass" placeholder="Nhập mật khẩu cũ...">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-pass">Mật khẩu mới</label>
+                        <input type="password" id="new-pass" placeholder="Nhập mật khẩu mới...">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-pass">Xác nhận mật khẩu mới</label>
+                        <input type="password" id="confirm-pass" placeholder="Nhập lại mật khẩu mới...">
+                    </div>
+                    <button type="submit" class="btn-submit btn-secondary"><i class="fas fa-key"></i> Đổi mật khẩu</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Cổng Lễ Tân</p>
+                </div>
+            </div>
+            <p>Hệ thống quản lý y tế MedBooking - Giải pháp toàn diện cho bệnh viện và phòng khám.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="dashboard.html">Tổng quan</a></li>
+                <li><a href="quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                <li><a href="check_in.html">Check-in</a></li>
+                <li><a href="vien_phi.html">Viện phí</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon"><i class="fas fa-info"></i></div>
+            <h3 id="modal-title">Thông báo</h3>
+            <p id="modal-message">Nội dung thông báo</p>
+            <div class="modal-actions" id="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="modal-confirm-btn">
+                    <i class="fas fa-check"></i> Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../static/js/client.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ============================================================
+            // ĐỒNG BỘ THÔNG TIN ĐĂNG NHẬP TỪ LOCALSTORAGE
+            // ============================================================
+            try {
+                let recName = 'Lễ tân';
+                let recEmail = 'letan@medbooking.vn';
+                let recPhone = '0912345678';
+                let recId = 'LT8801';
+
+                const loggedInUser = localStorage.getItem('medbooking_logged_in_user');
+                const currentUser = localStorage.getItem('medbooking_current_user');
+                const currentEmail = localStorage.getItem('medbooking_email');
+
+                if (loggedInUser) {
+                    const userData = JSON.parse(loggedInUser);
+                    recName = userData.name || userData.fullname || userData.ho_ten || recName;
+                    recEmail = userData.email || recEmail;
+                    recPhone = userData.phone || userData.so_dien_thoai || recPhone;
+                    recId = userData.id || userData.userId || recId;
+                } else if (currentUser) {
+                    const userData = JSON.parse(currentUser);
+                    recName = userData.name || userData.fullname || userData.ho_ten || recName;
+                    recEmail = userData.email || recEmail;
+                    recPhone = userData.phone || userData.so_dien_thoai || recPhone;
+                    recId = userData.id || userData.userId || recId;
+                } else if (currentEmail) {
+                    const users = JSON.parse(localStorage.getItem('medbooking_users')) || [];
+                    const found = users.find(u => u.email === currentEmail);
+                    if (found) {
+                        recName = found.fullname || found.name || recName;
+                        recEmail = found.email || recEmail;
+                        recPhone = found.phone || found.so_dien_thoai || recPhone;
+                        recId = found.id || recId;
+                    }
+                }
+
+                // Cập nhật lên Topbar
+                document.getElementById('topbar-receptionist-name').textContent = recName;
+
+                // Cập nhật lên Profile Header
+                document.getElementById('profile-name').textContent = recName;
+                document.getElementById('profile-email').textContent = recEmail;
+                document.getElementById('profile-phone').textContent = recPhone;
+                document.getElementById('profile-id').textContent = recId;
+
+                // Cập nhật các ô input trong form
+                document.getElementById('fullname').value = recName;
+                document.getElementById('email').value = recEmail;
+                document.getElementById('phone').value = recPhone;
+
+                // Tạo Avatar viết tắt chuẩn từ tên
+                const cleanName = recName.trim();
+                const parts = cleanName.split(/\s+/);
+                let initials = 'LT';
+                if (parts.length >= 2) {
+                    initials = (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+                } else if (parts.length === 1 && parts[0].length > 0) {
+                    initials = parts[0].slice(0, 2).toUpperCase();
+                }
+
+                document.getElementById('topbar-avatar').textContent = initials;
+                document.getElementById('profile-avatar-large').textContent = initials;
+
+            } catch (e) {
+                console.error("Không thể tải thông tin lễ tân từ localStorage:", e);
+            }
+
+            // THEME TOGGLE
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+
+            // MODAL SYSTEM
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalActions = document.getElementById('modal-actions');
+
+            window.showAlert = function(title, message, type = 'info', callback = null) {
+                modalIcon.className = 'modal-icon ' + type;
+                const iconEl = modalIcon.querySelector('i');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+                iconEl.className = 'fas ' + icons[type];
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalActions.innerHTML = `<button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đã hiểu</button>`;
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-confirm-btn').onclick = function() {
+                    closeModal();
+                    if (callback) callback();
+                };
+            };
+
+            function closeModal() { modalOverlay.classList.remove('active'); }
+            modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
+
+            window.updateInfo = function() {
+                showAlert('Cập nhật thành công', 'Thông tin cá nhân đã được cập nhật.', 'success');
+            };
+
+            window.changePassword = function() {
+                const curr = document.getElementById('current-pass').value;
+                const newP = document.getElementById('new-pass').value;
+                const conf = document.getElementById('confirm-pass').value;
+
+                if (!curr || !newP || !conf) {
+                    showAlert('Thiếu thông tin', 'Vui lòng nhập đầy đủ các trường mật khẩu!', 'warning');
+                    return;
+                }
+                if (newP !== conf) {
+                    showAlert('Lỗi', 'Mật khẩu xác nhận không khớp!', 'error');
+                    return;
+                }
+                if (newP.length < 6) {
+                    showAlert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự!', 'error');
+                    return;
+                }
+                showAlert('Đổi mật khẩu thành công', 'Mật khẩu của bạn đã được cập nhật.', 'success');
+                document.getElementById('current-pass').value = '';
+                document.getElementById('new-pass').value = '';
+                document.getElementById('confirm-pass').value = '';
+            };
+        });
+    </script>
+</body>
+</html>

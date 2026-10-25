@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedBooking - Danh sách Bác sĩ & Chuyên khoa</title>
+    <!-- Favicon chuẩn hình trái tim hồng sóng điện tim -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ⭐ CSS CHUNG -->
+    <link rel="stylesheet" href="../../static/css/BN.css">
+    
+    <!-- CSS RIÊNG CỦA TRANG DANH SÁCH BÁC SĨ -->
+    <style>
+        /* MAIN */
+        main {
+            max-width: 1200px;
+            margin: 40px auto 80px;
+            padding: 0 20px;
+        }
+
+        /* QUICK SPECIALTY */
+        .quick-specialty-section {
+            margin-bottom: 50px;
+        }
+
+        .quick-specialty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+
+        .specialty-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .specialty-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-pink);
+        }
+
+        .specialty-card i {
+            font-size: 28px;
+            color: var(--primary-pink);
+            background: var(--primary-pink-light);
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .specialty-card:hover i {
+            background: var(--primary-pink);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .specialty-card span {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        .specialty-card.active {
+            background: var(--primary-pink);
+            border-color: var(--primary-pink);
+        }
+
+        .specialty-card.active i {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+
+        .specialty-card.active span { color: #fff; }
+
+        /* FILTER PANEL */
+        .filter-panel {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            margin-bottom: 50px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 12px 18px;
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            background: var(--input-bg);
+            color: var(--secondary-color);
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            border-color: var(--primary-pink);
+            box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.15);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* DOCTOR GRID */
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .doctor-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px 25px;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-pink-light);
+        }
+
+        .doctor-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-pink-light), transparent);
+            z-index: 0;
+        }
+
+        .doctor-avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background-size: cover;
+            background-position: center;
+            border: 4px solid var(--bg-card);
+            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.25);
+            position: relative;
+            z-index: 1;
+        }
+
+        .doctor-card h5 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .doctor-card h5 a { color: var(--secondary-color); }
+        .doctor-card h5 a:hover { color: var(--primary-pink); }
+
+        .doctor-specialty {
+            display: inline-block;
+            background: var(--primary-pink-light);
+            color: var(--primary-pink);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .doctor-degree {
+            font-size: 13px;
+            color: var(--text-gray);
+            font-style: italic;
+            margin-bottom: 12px;
+        }
+
+        .doctor-rating {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .doctor-rating .stars { color: var(--star-color); }
+        .doctor-rating .score { font-weight: 700; color: var(--secondary-color); }
+        .doctor-rating .count { color: var(--text-gray); font-size: 12px; }
+
+        .doctor-exp {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-glass);
+        }
+
+        .doctor-exp i { color: var(--primary-pink); }
+
+        .doctor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .doctor-actions .btn {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 13px;
+            justify-content: center;
+        }
+
+        .btn-view-profile {
+            background: transparent;
+            border: 1px solid var(--primary-pink);
+            color: var(--primary-pink);
+        }
+
+        .btn-view-profile:hover {
+            background: var(--primary-pink);
+            color: #fff;
+        }
+
+        .btn-book-now {
+            background: var(--primary-pink);
+            color: #fff;
+        }
+
+        .btn-book-now:hover {
+            background: var(--primary-pink-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+        }
+
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 50px;
+        }
+
+        .pagination button {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid var(--border-glass);
+            background: var(--bg-card);
+            color: var(--text-gray);
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination button:hover {
+            border-color: var(--primary-pink);
+            color: var(--primary-pink);
+            background: var(--primary-pink-light);
+            transform: translateY(-2px);
+        }
+
+        .pagination button.active {
+            background: var(--primary-pink);
+            color: #fff;
+            border-color: var(--primary-pink);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .filter-actions { flex-direction: column; }
+            .filter-actions .btn { width: 100%; justify-content: center; }
+            .quick-specialty-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Chăm sóc sức khỏe toàn diện</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/benh_nhan/home_bn.html">Trang chủ</a></li>
+                    <li><a href="/benh_nhan/danh_sach_bac_si.html"><strong>Tìm kiếm Bác sĩ</strong></a></li>
+                    <li><a href="/benh_nhan/dat_lich.html">Đặt lịch khám</a></li>
+                    <li><a href="/benh_nhan/danh_sach_lich_hen.html">Lịch hẹn của tôi</a></li>
+                    <li><a href="/benh_nhan/ho_so_ca_nhan.html">Hồ sơ cá nhân</a></li>
+                    <li><a href="/dk_dn/dn.html">Đăng xuất</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi chế độ Sáng/Tối">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main>
+        <div class="page-title">
+            <h2>Danh sách Bác sĩ & Chuyên gia Y tế</h2>
+            <p>Tra cứu thông tin chi tiết về đội ngũ bác sĩ đầu ngành theo chuyên khoa hoặc tìm kiếm nâng cao</p>
+        </div>
+
+        <!-- QUICK SPECIALTY -->
+        <section class="quick-specialty-section">
+            <h3 class="section-title"><i class="fas fa-star"></i> Chuyên khoa phổ biến</h3>
+            <div class="quick-specialty-grid" id="quick-specialty-grid"></div>
+        </section>
+
+        <!-- FILTER PANEL -->
+        <section>
+            <div class="filter-panel">
+                <h3 class="section-title"><i class="fas fa-filter"></i> Bộ lọc tìm kiếm chi tiết</h3>
+                <form id="filter-form" onsubmit="event.preventDefault(); applyFilter();">
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label for="filter-spec">Chuyên khoa</label>
+                            <select id="filter-spec">
+                                <option value="">-- Tất cả chuyên khoa --</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-rating">Đánh giá tối thiểu</label>
+                            <select id="filter-rating">
+                                <option value="">-- Tất cả mức rating --</option>
+                                <option value="4.5">Từ 4.5 sao trở lên</option>
+                                <option value="4.0">Từ 4.0 sao trở lên</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-exp">Kinh nghiệm tối thiểu</label>
+                            <select id="filter-exp">
+                                <option value="">-- Tất cả kinh nghiệm --</option>
+                                <option value="5">Trên 5 năm</option>
+                                <option value="10">Trên 10 năm</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-keyword">Tìm theo tên bác sĩ</label>
+                            <input type="text" id="filter-keyword" placeholder="Nhập tên bác sĩ...">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="reset" class="btn btn-outline" onclick="resetFilter()"><i class="fas fa-redo"></i> Đặt lại</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Áp dụng bộ lọc</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- DOCTOR RESULTS -->
+        <section>
+            <h3 class="section-title"><i class="fas fa-user-md"></i> Kết quả danh sách Bác sĩ <span id="result-count" style="font-size:16px; font-family:'Poppins'; color:var(--text-gray); font-weight:400;"></span></h3>
+            <div class="doctors-grid" id="doctors-grid"></div>
+
+            <div class="pagination" id="pagination">
+                <button><i class="fas fa-chevron-left"></i></button>
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Chăm sóc sức khỏe toàn diện</p>
+                </div>
+            </div>
+            <p>Nền tảng công nghệ y tế kết nối người bệnh với các bệnh viện và phòng khám uy tín hàng đầu. Cam kết quy trình nhanh gọn, minh bạch chi phí và bảo mật thông tin tuyệt đối.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào, bình an và hạnh phúc!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="home_bn.html">Trang chủ</a></li>
+                <li><a href="danh_sach_bac_si.html">Tìm kiếm Bác sĩ</a></li>
+                <li><a href="dat_lich.html">Đặt lịch khám</a></li>
+                <li><a href="danh_sach_lich_hen.html">Lịch hẹn cá nhân</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ & Địa chỉ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon"><i class="fas fa-info"></i></div>
+            <h3 id="modal-title">Thông báo</h3>
+            <p id="modal-message">Nội dung thông báo</p>
+            <div class="modal-actions" id="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="modal-confirm-btn">
+                    <i class="fas fa-check"></i> Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../static/js/BN_Store.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // THEME TOGGLE
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+
+            // MODAL SYSTEM
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalActions = document.getElementById('modal-actions');
+
+            window.showAlert = function(title, message, type = 'info', callback = null) {
+                modalIcon.className = 'modal-icon ' + type;
+                const iconEl = modalIcon.querySelector('i');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+                iconEl.className = 'fas ' + icons[type];
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalActions.innerHTML = `<button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đã hiểu</button>`;
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-confirm-btn').onclick = function() {
+                    closeModal();
+                    if (callback) callback();
+                };
+            };
+
+            function closeModal() { modalOverlay.classList.remove('active'); }
+            modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
+
+            // DATA
+            const specialties = [
+                { id: 'noi', name: 'Nội Tổng Quát', icon: 'fa-stethoscope' },
+                { id: 'tim-mach', name: 'Tim Mạch', icon: 'fa-heartbeat' },
+                { id: 'nhi', name: 'Nhi Khoa', icon: 'fa-baby' },
+                { id: 'than-kinh', name: 'Thần Kinh', icon: 'fa-brain' },
+                { id: 'xuong-khop', name: 'Cơ Xương Khớp', icon: 'fa-bone' },
+                { id: 'da-lieu', name: 'Da Liễu', icon: 'fa-allergies' },
+                { id: 'tai-mui-hong', name: 'Tai Mũi Họng', icon: 'fa-ear-listen' },
+                { id: 'mat', name: 'Mắt', icon: 'fa-eye' },
+                { id: 'rang-ham-mat', name: 'Răng Hàm Mặt', icon: 'fa-tooth' },
+                { id: 'y-hoc-co-truyen', name: 'Y Học Cổ Truyền', icon: 'fa-leaf' }
+            ];
+
+            const doctors = [
+                { id: 'bs01', name: 'ThS.BS Nguyễn Văn A', specialtyId: 'noi', specialty: 'Nội Tổng Quát', degree: 'Thạc sĩ - Bác sĩ nội trú', rating: 4.9, reviews: 120, experience: 12, avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+                { id: 'bs02', name: 'BS.CKI Trần Thị C', specialtyId: 'tim-mach', specialty: 'Tim Mạch', degree: 'Bác sĩ Chuyên khoa I', rating: 4.8, reviews: 98, experience: 10, avatar: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+                { id: 'bs03', name: 'TS.BS Lê Hoàng D', specialtyId: 'than-kinh', specialty: 'Thần Kinh', degree: 'Tiến sĩ - Bác sĩ', rating: 5.0, reviews: 150, experience: 18, avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+                { id: 'bs04', name: 'BS.CKII Phạm Văn E', specialtyId: 'xuong-khop', specialty: 'Cơ Xương Khớp', degree: 'Bác sĩ Chuyên khoa II', rating: 4.7, reviews: 85, experience: 15, avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+                { id: 'bs05', name: 'BS. Nguyễn Thị Nhi', specialtyId: 'nhi', specialty: 'Nhi Khoa', degree: 'Bác sĩ Đa khoa', rating: 4.9, reviews: 200, experience: 8, avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+                { id: 'bs06', name: 'BS. Trần Văn Mắt', specialtyId: 'mat', specialty: 'Mắt', degree: 'Bác sĩ Chuyên khoa I', rating: 4.6, reviews: 75, experience: 9, avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' }
+            ];
+
+            // RENDER QUICK SPECIALTY
+            function renderQuickSpecialty(activeId = '') {
+                const grid = document.getElementById('quick-specialty-grid');
+                grid.innerHTML = specialties.map(spec => `
+                    <div class="specialty-card ${spec.id === activeId ? 'active' : ''}" onclick="quickFilter('${spec.id}')">
+                        <i class="fas ${spec.icon}"></i>
+                        <span>${spec.name}</span>
+                    </div>
+                `).join('');
+            }
+
+            // RENDER SPECIALTY OPTIONS
+            function renderSpecialtyOptions() {
+                const select = document.getElementById('filter-spec');
+                select.innerHTML = '<option value="">-- Tất cả chuyên khoa --</option>' + 
+                    specialties.map(spec => `<option value="${spec.id}">${spec.name}</option>`).join('');
+            }
+
+            // RENDER DOCTORS
+            function renderDoctors(filteredDoctors) {
+                const grid = document.getElementById('doctors-grid');
+                const countEl = document.getElementById('result-count');
+                countEl.textContent = `(${filteredDoctors.length} bác sĩ)`;
+
+                if (filteredDoctors.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-user-md"></i>
+                            <h3>Không tìm thấy bác sĩ nào</h3>
+                            <p>Vui lòng thử lại với bộ lọc khác.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = filteredDoctors.map(doc => `
+                    <div class="doctor-card">
+                        <div class="doctor-avatar" style="background-image: url('${doc.avatar}')"></div>
+                        <h5><a href="chi_tiet_bac_si.html?id=${doc.id}">${doc.name}</a></h5>
+                        <span class="doctor-specialty">${doc.specialty}</span>
+                        <p class="doctor-degree">${doc.degree}</p>
+                        <div class="doctor-rating">
+                            <span class="stars">
+                                ${'<i class="fas fa-star"></i>'.repeat(Math.floor(doc.rating))}
+                                ${doc.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                            </span>
+                            <span class="score">${doc.rating}</span>
+                            <span class="count">(${doc.reviews} đánh giá)</span>
+                        </div>
+                        <p class="doctor-exp"><i class="fas fa-briefcase"></i> Kinh nghiệm: ${doc.experience} năm</p>
+                        <div class="doctor-actions">
+                            <a href="chi_tiet_bac_si.html?id=${doc.id}" style="flex:1;"><button class="btn btn-view-profile">Xem hồ sơ</button></a>
+                            <a href="dat_lich.html?doctor_id=${doc.id}" style="flex:1;"><button class="btn btn-book-now">Đặt lịch</button></a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // FILTER LOGIC
+            let currentFilter = { specialty: '', rating: '', experience: '', keyword: '' };
+
+            window.quickFilter = function(specialtyId) {
+                currentFilter.specialty = specialtyId;
+                document.getElementById('filter-spec').value = specialtyId;
+                renderQuickSpecialty(specialtyId);
+                applyFilter();
+                window.scrollTo({ top: document.getElementById('doctors-grid').offsetTop - 100, behavior: 'smooth' });
+            };
+
+            window.applyFilter = function() {
+                currentFilter.specialty = document.getElementById('filter-spec').value;
+                currentFilter.rating = parseFloat(document.getElementById('filter-rating').value) || 0;
+                currentFilter.experience = parseInt(document.getElementById('filter-exp').value) || 0;
+                currentFilter.keyword = document.getElementById('filter-keyword').value.toLowerCase().trim();
+
+                renderQuickSpecialty(currentFilter.specialty);
+
+                let filtered = doctors.filter(doc => {
+                    if (currentFilter.specialty && doc.specialtyId !== currentFilter.specialty) return false;
+                    if (currentFilter.rating && doc.rating < currentFilter.rating) return false;
+                    if (currentFilter.experience && doc.experience < currentFilter.experience) return false;
+                    if (currentFilter.keyword && !doc.name.toLowerCase().includes(currentFilter.keyword)) return false;
+                    return true;
+                });
+
+                renderDoctors(filtered);
+            };
+
+            window.resetFilter = function() {
+                document.getElementById('filter-form').reset();
+                currentFilter = { specialty: '', rating: '', experience: '', keyword: '' };
+                renderQuickSpecialty('');
+                renderDoctors(doctors);
+            };
+
+            // INIT
+            renderQuickSpecialty();
+            renderSpecialtyOptions();
+            renderDoctors(doctors);
+        });
+    </script>
+</body>
+</html>

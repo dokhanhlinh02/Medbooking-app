@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEDBOOKING - Trang chủ Bác sĩ</title>
+<!-- Favicon hình chú chim cánh cụt y tế -->
+<link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+
+<link rel="stylesheet" href="../../static/css/BS.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@700&display=swap" rel="stylesheet">
+<style>
+    /* In đậm và hiển thị rõ ràng logo MedBooking */
+    .brand .logo-text h1 {
+        font-family: 'Quicksand', sans-serif !important;
+        font-weight: 800 !important;
+        font-size: 22px !important;
+        text-transform: none !important;
+        letter-spacing: -0.01em;
+        color: #FFFFFF !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    [data-theme="light"] .brand .logo-text h1 {
+        color: #1E293B !important;
+    }
+
+    /* Hiệu ứng hover cho user-chip của bác sĩ */
+    .user-chip-container {
+        position: relative;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+    }
+    .topbar-right .user-chip {
+        transition: all 0.25s ease;
+    }
+    .user-chip-container:hover .user-chip {
+        background: var(--primary-light, #f3e8ff);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        transform: translateY(-1px);
+    }
+
+    /* Biến các thẻ thống kê thành liên kết có hiệu ứng tương tác mượt mà */
+    .stat-card-link {
+        text-decoration: none;
+        display: block;
+        color: inherit;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card-link:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Khung dropdown thông báo: Nền đặc hoàn toàn, tách lớp rõ ràng */
+    .notification-dropdown, 
+    .user-dropdown {
+        position: absolute !important;
+        top: 60px !important;
+        background-color: #FFFFFF !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        opacity: 1 !important;
+        border: 2px solid #CBD5E1 !important;
+        border-radius: 18px !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        display: none;
+        z-index: 2147483647 !important;
+        overflow: hidden;
+    }
+
+    /* Khi ở chế độ tối (Dark mode) */
+    [data-theme="dark"] .notification-dropdown,
+    [data-theme="dark"] .user-dropdown,
+    html.dark .notification-dropdown,
+    html.dark .user-dropdown {
+        background-color: #0F172A !important;
+        border-color: #334155 !important;
+    }
+
+    .notification-dropdown.active, 
+    .user-dropdown.active {
+        display: block !important;
+    }
+
+    .notification-header {
+        padding: 12px 16px;
+        font-weight: 700;
+        font-size: 13px;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(236, 72, 153, 0.08)) !important;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .notification-header span:first-child {
+        background: linear-gradient(135deg, #8B5CF6, #EC4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        font-size: 13.5px;
+    }
+
+    .notification-list {
+        max-height: 280px;
+        overflow-y: auto;
+        background-color: transparent !important;
+    }
+
+    .notification-item {
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+        font-size: 12px;
+        background-color: transparent !important;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .notification-item:hover {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+    }
+    
+    .notification-item strong {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 12.5px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Định dạng riêng cho menu Đăng xuất */
+    .user-dropdown {
+        right: 0 !important;
+        width: 170px !important;
+    }
+    .user-dropdown a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #EF4444 !important;
+        text-decoration: none;
+        background-color: transparent !important;
+        transition: all 0.2s;
+    }
+    .user-dropdown a:hover {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <i class="fas fa-headset"></i>
+        </div>
+        <div class="logo-text">
+          <h1>MedBooking</h1>
+          <p>Bác sĩ</p>
+        </div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">Tổng quan</div>
+      <ul class="nav-list"><li><a href="home_bs.html" class="nav-link"><i class="fas fa-house-medical"></i><span>Trang chủ Bác sĩ</span></a></li></ul>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">Tác nghiệp khám bệnh</div>
+      <ul class="nav-list">
+        <li><a href="/bac_si/danh_sach_ca_kham.html" class="nav-link"><i class="fas fa-calendar-check"></i><span>Lịch hẹn & Ca khám</span></a></li>
+        <li><a href="/bac_si/ho_so_ca_nhan.html" class="nav-link"><i class="fas fa-user-doctor"></i><span>Hồ sơ & Lịch trực</span></a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar-sm" id="sidebar-avatar">BS</div>
+      <div class="info">
+        <strong id="sidebar-doctor-name">BS. Bác sĩ</strong>
+        <span id="sidebar-doctor-specialty">Nội Tổng Quát</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+        <h1 class="page-title">Tổng quan Bác sĩ</h1>
+      </div>
+      <div class="topbar-right" style="position: relative; display: flex; align-items: center; gap: 12px;">
+        <button class="icon-btn theme-toggle" id="theme-toggle"><i class="fas fa-moon"></i><i class="fas fa-sun"></i></button>
+        <button class="icon-btn" id="btn-notify"><i class="fas fa-bell"></i><span class="badge" style="display:inline-block; width:8px; height:8px; background:#F472B6; border-radius:50%; position:absolute; top:8px; right:60px;"></span></button>
+        
+        <!-- Khung dropdown thông báo -->
+        <div class="notification-dropdown" id="notification-dropdown">
+            <div class="notification-header">
+                <span>Thông báo mới</span>
+                <span style="font-size:11px; font-weight:700; color:#38BDF8; cursor:pointer;" id="mark-all-read">Đánh dấu đã đọc</span>
+            </div>
+            <div class="notification-list">
+                <div class="notification-item">
+                    <strong>Lịch hẹn mới</strong>
+                    Bệnh nhân vừa đặt lịch khám vào lúc 09:00 sáng mai.
+                </div>
+                <div class="notification-item">
+                    <strong>Cập nhật lịch trực</strong>
+                    Admin đã duyệt lịch trực tuần tới của bạn.
+                </div>
+                <div class="notification-item">
+                    <strong>Kết quả xét nghiệm</strong>
+                    Bệnh nhân đã có kết quả cận lâm sàng.
+                </div>
+            </div>
+        </div>
+
+        <!-- Nút thông tin bác sĩ bấm vào hiện menu Đăng xuất -->
+        <div class="user-chip-container" id="user-menu-btn">
+          <div class="user-chip">
+            <div class="avatar" id="topbar-avatar">BS</div>
+            <span class="name" id="topbar-doctor-name">BS. Bác sĩ</span>
+          </div>
+          
+          <div class="user-dropdown" id="user-dropdown">
+              <a href="../dk_dn/dn.html"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-clock"></i> Ca khám sắp tới</h2>
+          <a href="danh_sach_ca_kham.html" class="btn btn-outline btn-sm">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>Giờ</th><th>Mã LH</th><th>Bệnh nhân</th><th>Triệu chứng</th><th>Trạng thái</th></tr>
+            </thead>
+            <tbody id="home-appointments-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="../../static/js/bac_si.js"></script>
+<script>
+window.MB_PAGE_INIT = function () {
+  try {
+    let doctorName = 'Bác sĩ';
+    
+    // Lấy thông tin từ localStorage của tài khoản vừa đăng ký/đăng nhập
+    const loggedInUser = localStorage.getItem('medbooking_logged_in_user');
+    const currentUser = localStorage.getItem('medbooking_current_user');
+
+    if (loggedInUser) {
+      const userData = JSON.parse(loggedInUser);
+      doctorName = userData.name || userData.fullname || userData.ho_ten || doctorName;
+    } else if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      doctorName = userData.name || userData.fullname || userData.ho_ten || doctorName;
+    } else {
+      const currentEmail = localStorage.getItem('medbooking_email');
+      const users = JSON.parse(localStorage.getItem('medbooking_users')) || [];
+      const found = users.find(u => u.email === currentEmail);
+      if (found) {
+        doctorName = found.fullname || found.name || doctorName;
+      }
+    }
+
+    // Hiển thị chuẩn xác tên đã đăng ký kèm tiền tố BS.
+    const formattedName = doctorName.startsWith('BS.') ? doctorName : `BS. ${doctorName}`;
+    
+    // Cập nhật tên lên Topbar và Sidebar
+    const topbarNameEl = document.getElementById('topbar-doctor-name');
+    if (topbarNameEl) topbarNameEl.textContent = formattedName;
+
+    const sidebarNameEl = document.getElementById('sidebar-doctor-name');
+    if (sidebarNameEl) sidebarNameEl.textContent = formattedName;
+
+    // Tạo avatar viết tắt chuẩn từ tên đăng ký
+    const cleanName = doctorName.replace(/^BS\.\s*/i, '').trim();
+    const parts = cleanName.split(/\s+/);
+    let initials = 'BS';
+    if (parts.length >= 2) {
+      initials = (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+    } else if (parts.length === 1 && parts[0].length > 0) {
+      initials = parts[0].slice(0, 2).toUpperCase();
+    }
+
+    const topbarAvatar = document.getElementById('topbar-avatar');
+    const sidebarAvatar = document.getElementById('sidebar-avatar');
+    if (topbarAvatar) topbarAvatar.textContent = initials;
+    if (sidebarAvatar) sidebarAvatar.textContent = initials;
+
+  } catch (e) {
+    console.error("Lỗi khi đồng bộ tên bác sĩ:", e);
+  }
+
+  const s = MB_MOCK.stats;
+  document.getElementById('stats-grid').innerHTML = `
+    <a href="danh_sach_ca_kham.html" class="stat-card-link">
+      <div class="stat-card stat-green">
+        <div class="icon-bg"><i class="fas fa-stethoscope"></i></div>
+        <div class="label">Ca khám hôm nay</div>
+        <div class="value">${s.today}</div>
+        <div class="trend"><i class="fas fa-arrow-up"></i> +2 so với hôm qua</div>
+      </div>
+    </a>
+    <a href="danh_sach_ca_kham.html" class="stat-card-link">
+      <div class="stat-card stat-teal">
+        <div class="icon-bg"><i class="fas fa-circle-check"></i></div>
+        <div class="label">Đã hoàn thành</div>
+        <div class="value">${s.done}</div>
+        <div class="trend"><i class="fas fa-clock"></i> Còn ${s.waiting} ca chờ</div>
+      </div>
+    </a>
+    <a href="danh_sach_ca_kham.html" class="stat-card-link">
+      <div class="stat-card stat-amber">
+        <div class="icon-bg"><i class="fas fa-hourglass-half"></i></div>
+        <div class="label">Đang chờ khám</div>
+        <div class="value">${s.waiting}</div>
+        <div class="trend"><i class="fas fa-user"></i> 3 bệnh nhân mới</div>
+      </div>
+    </a>
+    <a href="ho_so_ca_nhan.html" class="stat-card-link">
+      <div class="stat-card stat-sky">
+        <div class="icon-bg"><i class="fas fa-calendar-week"></i></div>
+        <div class="label">Lịch trực tuần</div>
+        <div class="value">${s.weekShifts}</div>
+        <div class="trend"><i class="fas fa-sun"></i> Ca sáng & chiều</div>
+      </div>
+    </a>
+  `;
+
+  const badgeMap = {
+    waiting:      ['badge-waiting',   'Chờ khám'],
+    'in-progress':['badge-progress',  'Đang khám'],
+    completed:    ['badge-completed', 'Đã hoàn thành'],
+    cancelled:    ['badge-cancelled', 'Đã hủy']
+  };
+  const tbody = document.getElementById('home-appointments-body');
+  tbody.innerHTML = '';
+
+  MB_MOCK.appointments.slice(0, 3).forEach((a) => {
+    const [cls, txt] = badgeMap[a.status] || ['badge-waiting', a.status];
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${a.time.split(' - ')[0]}</strong></td>
+        <td>${a.id}</td>
+        <td>${a.name}</td>
+        <td>${a.symptom}</td>
+        <td><span class="badge-status ${cls}">${txt}</span></td>
+      </tr>`;
+  });
+
+  const btnNotify = document.getElementById('btn-notify');
+  const notifyDropdown = document.getElementById('notification-dropdown');
+  const badgeDot = btnNotify.querySelector('.badge');
+
+  btnNotify.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userDropdown.classList.remove('active');
+    notifyDropdown.classList.toggle('active');
+  });
+
+  const userMenuBtn = document.getElementById('user-menu-btn');
+  const userDropdown = document.getElementById('user-dropdown');
+
+  userMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifyDropdown.classList.remove('active');
+    userDropdown.classList.toggle('active');
+  });
+
+  document.addEventListener('click', () => {
+    notifyDropdown.classList.remove('active');
+    userDropdown.classList.remove('active');
+  });
+
+  document.getElementById('mark-all-read').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(badgeDot) badgeDot.style.display = 'none';
+    notifyDropdown.classList.remove('active');
+    if(typeof showToast === 'function') {
+      showToast('Đã đánh dấu tất cả thông báo là đã đọc', 'success', 2000);
+    }
+  });
+};
+</script>
+</body>
+</html>

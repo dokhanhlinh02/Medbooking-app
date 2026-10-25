@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedBooking - Hồ sơ Cá nhân Bệnh nhân</title>
+    <!-- Favicon chuẩn hình trái tim hồng sóng điện tim -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ⭐ CSS CHUNG -->
+    <link rel="stylesheet" href="../../static/css/BN.css">
+    
+    <!-- CSS RIÊNG CỦA TRANG HỒ SƠ -->
+    <style>
+        /* MAIN */
+        main {
+            max-width: 1200px;
+            margin: 40px auto 80px;
+            padding: 0 20px;
+        }
+
+        /* PROFILE GRID */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        /* FORM CARD */
+        .form-card {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            transition: all 0.3s ease;
+        }
+
+        .form-card:hover {
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-pink-light);
+        }
+
+        .form-card h3 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: var(--primary-pink);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-pink-light);
+        }
+
+        .form-card h3 i {
+            font-size: 20px;
+            background: var(--primary-pink-light);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* BUTTON SUBMIT */
+        .btn-submit {
+            background: var(--primary-pink);
+            color: var(--btn-text-color);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-pink-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 107, 157, 0.4);
+            color: #fff;
+        }
+
+        .btn-submit.btn-secondary {
+            background: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-submit.btn-secondary:hover {
+            background: var(--primary-pink);
+            color: #fff;
+            box-shadow: 0 10px 25px rgba(255, 107, 157, 0.3);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Chăm sóc sức khỏe toàn diện</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/benh_nhan/home_bn.html">Trang chủ</a></li>
+                    <li><a href="/benh_nhan/danh_sach_bac_si.html">Tìm kiếm Bác sĩ</a></li>
+                    <li><a href="/benh_nhan/dat_lich.html">Đặt lịch khám</a></li>
+                    <li><a href="/benh_nhan/danh_sach_lich_hen.html">Lịch hẹn của tôi</a></li>
+                    <li><a href="/benh_nhan/ho_so_ca_nhan.html"><strong>Hồ sơ cá nhân</strong></a></li>
+                    <li><a href="/dk_dn/dn.html">Đăng xuất</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi chế độ Sáng/Tối">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main>
+        <div class="page-title">
+            <h2>Thông tin Tài khoản & Hồ sơ Bệnh nhân</h2>
+            <p>Quản lý thông tin cá nhân và bảo mật tài khoản của bạn</p>
+        </div>
+        
+        <div class="profile-grid">
+            <div class="form-card">
+                <h3><i class="fas fa-user-circle"></i> Thông tin cá nhân</h3>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="patient-name">Họ và tên:</label>
+                        <input type="text" id="patient-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patient-phone">Số điện thoại:</label>
+                        <input type="text" id="patient-phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="patient-email">Email đăng ký:</label>
+                        <input type="email" id="patient-email" name="email" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="patient-dob">Ngày sinh:</label>
+                        <input type="date" id="patient-dob" name="dob">
+                    </div>
+                    <div class="form-group">
+                        <label for="patient-gender">Giới tính:</label>
+                        <select id="patient-gender" name="gender">
+                            <option value="Nữ">Nữ</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="patient-address">Địa chỉ liên hệ:</label>
+                        <input type="text" id="patient-address" name="address">
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Cập nhật thông tin</button>
+                </form>
+            </div>
+
+            <div class="form-card">
+                <h3><i class="fas fa-shield-alt"></i> Đổi Mật khẩu Bảo mật</h3>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label for="current-password">Mật khẩu hiện tại:</label>
+                        <input type="password" id="current-password" name="current_password" placeholder="Nhập mật khẩu cũ...">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">Mật khẩu mới:</label>
+                        <input type="password" id="new-password" name="new_password" placeholder="Nhập mật khẩu mới...">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Xác nhận mật khẩu mới:</label>
+                        <input type="password" id="confirm-password" name="confirm_password" placeholder="Nhập lại mật khẩu mới...">
+                    </div>
+                    <button type="submit" class="btn-submit btn-secondary"><i class="fas fa-key"></i> Đổi mật khẩu</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Chăm sóc sức khỏe toàn diện</p>
+                </div>
+            </div>
+            <p>Nền tảng công nghệ y tế kết nối người bệnh với các bệnh viện và phòng khám uy tín hàng đầu. Cam kết quy trình nhanh gọn, minh bạch chi phí và bảo mật thông tin tuyệt đối.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào, bình an và hạnh phúc!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="/home_bn.html">Trang chủ</a></li>
+                <li><a href="/danh_sach_bac_si.html">Tìm kiếm Bác sĩ</a></li>
+                <li><a href="/dat_lich.html">Đặt lịch khám</a></li>
+                <li><a href="/danh_sach_lich_hen.html">Lịch hẹn cá nhân</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ & Địa chỉ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/BN_Store.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Xử lý đổi theme
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+
+            // Tải thông tin hồ sơ cá nhân từ API FastAPI
+            const currentEmail = localStorage.getItem("medbooking_email") || "tratara1612@gmail.com";
+            const emailInput = document.getElementById("patient-email");
+            if (emailInput) emailInput.value = currentEmail;
+
+            try {
+                const response = await fetch(`/api/benh-nhan/ho-so/${encodeURIComponent(currentEmail)}`);
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const data = result.data;
+                    if (document.getElementById("patient-name")) document.getElementById("patient-name").value = data.fullname || "";
+                    if (document.getElementById("patient-phone")) document.getElementById("patient-phone").value = data.phone || "";
+                    if (document.getElementById("patient-dob")) document.getElementById("patient-dob").value = data.date_of_birth || "";
+                    if (document.getElementById("patient-gender")) document.getElementById("patient-gender").value = data.gender || "Nữ";
+                    if (document.getElementById("patient-address")) document.getElementById("patient-address").value = data.address || "";
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải thông tin hồ sơ:", error);
+            }
+
+            // Gửi thông tin cập nhật lên Backend
+            const profileForm = document.getElementById("profileForm");
+            if (profileForm) {
+                profileForm.addEventListener("submit", async function(e) {
+                    e.preventDefault();
+
+                    const payload = {
+                        fullname: document.getElementById("patient-name").value.trim(),
+                        phone: document.getElementById("patient-phone").value.trim(),
+                        date_of_birth: document.getElementById("patient-dob").value,
+                        gender: document.getElementById("patient-gender").value,
+                        address: document.getElementById("patient-address").value.trim()
+                    };
+
+                    try {
+                        const updateResponse = await fetch(`/api/benh-nhan/ho-so/${encodeURIComponent(currentEmail)}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const updateResult = await updateResponse.json();
+
+                        if (updateResponse.ok && updateResult.success) {
+                            alert("Cập nhật thông tin hồ sơ thành công!");
+                        } else {
+                            alert(updateResult.detail || "Cập nhật thất bại, vui lòng thử lại.");
+                        }
+                    } catch (err) {
+                        console.error("Lỗi kết nối:", err);
+                        alert("Không thể kết nối đến máy chủ.");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

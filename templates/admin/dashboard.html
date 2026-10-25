@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Dashboard Thống kê & Báo cáo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/A.css">
+    <style>
+        /* In đậm và định dạng phông chữ thương hiệu MedBooking mềm mại */
+        .brand-name {
+            font-family: 'Quicksand', sans-serif !important;
+            font-weight: 700 !important;
+            text-transform: none !important;
+            letter-spacing: -0.01em;
+            font-size: 22px;
+        }
+
+        /* Hiệu ứng hover sáng lên cho nút Admin giống nút thông báo */
+        .admin-profile-btn {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 8px 16px;
+            background: var(--primary-light);
+            border-radius: 50px;
+            transition: all 0.25s ease;
+        }
+        .admin-profile-btn:hover {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .welcome-bar {
+            display: flex; align-items: center; gap: 16px;
+            padding: 22px 28px;
+            background: linear-gradient(135deg, #FFFFFF 0%, #FAF5FF 100%);
+            border: 1px solid rgba(139, 92, 246, 0.12);
+            border-radius: 22px; margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.05);
+        }
+        [data-theme="dark"] .welcome-bar {
+            background: linear-gradient(135deg, #1A1130 0%, #221640 100%);
+            border-color: rgba(167, 139, 250, 0.15);
+        }
+        .welcome-info h2 {
+            font-family: 'Plus Jakarta Sans'; font-size: 20px; font-weight: 800;
+            color: var(--secondary-color); margin-bottom: 2px;
+        }
+        .welcome-info p { font-size: 13px; color: var(--text-gray); }
+
+        .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+        .kpi-card {
+            background: var(--bg-card); border: 1px solid var(--border-glass);
+            border-radius: 18px; padding: 16px 18px;
+            display: flex; align-items: center; gap: 12px;
+            box-shadow: var(--shadow-soft);
+        }
+        .kpi-card .kpi-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: #fff;
+            background: linear-gradient(135deg, #C4B5FD, #A78BFA); flex-shrink: 0;
+        }
+        .kpi-card .kpi-body { flex: 1; min-width: 0; }
+        .kpi-card .kpi-label {
+            font-size: 11.5px; font-weight: 500; color: var(--text-gray);
+            text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px;
+        }
+        .kpi-card .kpi-value {
+            font-family: 'Plus Jakarta Sans'; font-size: 18px; font-weight: 800;
+            color: var(--secondary-color);
+        }
+
+        .gradient-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+        .gradient-card {
+            position: relative; padding: 20px 22px; border-radius: 20px;
+            color: #fff; overflow: hidden;
+            box-shadow: 0 12px 28px rgba(168, 85, 247, 0.3);
+        }
+        .gradient-card.pink { background: linear-gradient(135deg, #F0ABFC 0%, #E879F9 50%, #C084FC 100%); }
+        .gradient-card.purple { background: linear-gradient(135deg, #C4B5FD 0%, #A78BFA 50%, #8B5CF6 100%); }
+        .gradient-card .gc-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(255, 255, 255, 0.22); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; margin-bottom: 14px;
+        }
+        .gradient-card .gc-value {
+            font-family: 'Plus Jakarta Sans'; font-size: 26px; font-weight: 800;
+            letter-spacing: -0.03em; line-height: 1; margin-bottom: 4px;
+        }
+        .gradient-card .gc-label { font-size: 12px; font-weight: 500; opacity: 0.92; }
+
+        .progress-card, .calendar-card, .panel {
+            background: var(--bg-card); border: 1px solid var(--border-glass);
+            border-radius: 22px; padding: 22px;
+            box-shadow: var(--shadow-soft);
+        }
+        .progress-card h3, .calendar-card h3, .panel h3 {
+            font-size: 14px; font-weight: 700;
+            color: var(--secondary-color); margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel h3 .view-all { font-size: 11.5px; font-weight: 600; color: var(--primary-color); text-decoration: none; }
+
+        .chart-main {
+            background: var(--bg-card); border: 1px solid var(--border-glass);
+            border-radius: 22px; padding: 22px 24px;
+            box-shadow: var(--shadow-soft);
+        }
+        .chart-main h3 {
+            font-size: 14px; font-weight: 700;
+            color: var(--secondary-color); margin-bottom: 6px;
+        }
+        .chart-main .chart-sub {
+            font-size: 12px; color: var(--text-gray); margin-bottom: 16px;
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+        }
+        .chart-main canvas { width: 100% !important; max-height: 260px; }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .cal-grid .cal-day-name {
+            font-size: 11px; color: var(--text-gray); text-align: center;
+            font-weight: 700; padding: 6px 0; text-transform: uppercase;
+        }
+        .cal-grid .cal-day {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            font-size: 12.5px; font-weight: 500; color: var(--secondary-color);
+            border-radius: 10px; cursor: pointer;
+        }
+        .cal-grid .cal-day:hover { background: var(--primary-soft); color: var(--primary-color); }
+        .cal-grid .cal-day.muted { color: var(--text-gray); opacity: 0.45; }
+        .cal-grid .cal-day.today {
+            background: linear-gradient(135deg, #A78BFA, #7C3AED);
+            color: #fff; font-weight: 700;
+        }
+        .cal-grid .cal-day.active { background: var(--primary-light); color: var(--primary-color); font-weight: 700; }
+
+        .activity-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 0; border-bottom: 1px solid var(--border-glass);
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-item .act-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: #fff;
+            background: var(--primary-gradient); flex-shrink: 0;
+        }
+        .activity-item .act-body { flex: 1; min-width: 0; }
+        .activity-item .act-title {
+            font-size: 13px; font-weight: 600; color: var(--secondary-color);
+            margin-bottom: 2px;
+        }
+        .activity-item .act-time { font-size: 11.5px; color: var(--text-gray); }
+        .activity-item .act-amount {
+            font-family: 'Plus Jakarta Sans'; font-size: 13px; font-weight: 700;
+            color: #10B981; white-space: nowrap;
+        }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; margin-bottom: 18px; }
+        @media (max-width: 1100px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .kpi-row { grid-template-columns: 1fr; } .gradient-cards { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <button class="sidebar-close" id="sidebar-close" aria-label="Đóng menu"><i class="fas fa-times"></i></button>
+        <div class="brand">
+            <span class="brand-name">MedBooking</span>
+            <span class="brand-sub">ADMIN PANEL</span>
+        </div>
+        <nav>
+            <h3>QUẢN LÝ NHÂN SỰ & NGƯỜI DÙNG</h3>
+            <ul>
+                <li><a href="home_a.html">Trang chủ Admin</a></li>
+                <li><a href="quan_ly_tai_khoan.html">Quản lý tài khoản</a></li>
+                <li><a href="quan_ly_bac_si.html">Quản lý bác sĩ</a></li>
+            </ul>
+            <h3>DANH MỤC Y TẾ</h3>
+            <ul>
+                <li><a href="quan_ly_chuyen_khoa.html">Quản lý chuyên khoa</a></li>
+                <li><a href="quan_ly_dich_vu.html">Quản lý dịch vụ & giá</a></li>
+                <li><a href="quan_ly_mapping.html">Quản lý Mapping Triệu chứng</a></li>
+            </ul>
+            <h3>BÁO CÁO & THỐNG KÊ</h3>
+            <ul>
+                <li><a href="dashboard.html"><strong>Dashboard Thống kê & Báo cáo</strong></a></li>
+                <li><a href="nhat_ky_giao_dich.html">Nhật ký Giao dịch Chi tiết</a></li>
+                <li><a href="thung_rac.html">Thùng rác hệ thống</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main>
+        <header>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Mở menu"><i class="fas fa-bars"></i></button>
+            <h1>Dashboard Thống kê & Báo cáo</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <!-- Gắn id="admin-name-btn" để tự động cập nhật tên động của tài khoản đăng nhập -->
+                <a href="ho_so_ca_nhan.html" class="admin-profile-btn" id="admin-name-btn">AD Tên Admin</a>
+                <button class="theme-toggle" id="theme-toggle">🌙</button>
+                <a href="../dk_dn/dn.html">Đăng xuất</a>
+            </div>
+        </header>
+
+        <section>
+            <div class="welcome-bar">
+                <div class="welcome-info">
+                    <h2>Xin chào, Admin 👋</h2>
+                    <p>Chào mừng trở lại! Đây là tổng quan hệ thống hôm nay.</p>
+                </div>
+            </div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:var(--border-radius);box-shadow:var(--shadow-soft);margin-bottom:20px;">
+                <label for="filter-year" style="font-size:13px;font-weight:600;color:var(--text-gray);">Chọn Năm:</label>
+                <select id="filter-year" style="max-width:140px;">
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                </select>
+                <label for="filter-quarter" style="font-size:13px;font-weight:600;color:var(--text-gray);">Chọn Quý:</label>
+                <select id="filter-quarter" style="max-width:160px;">
+                    <option value="all">Cả năm</option>
+                    <option value="Q1">Quý 1</option>
+                    <option value="Q2">Quý 2</option>
+                    <option value="Q3">Quý 3</option>
+                    <option value="Q4">Quý 4</option>
+                </select>
+            </div>
+        </section>
+
+        <section>
+            <div class="dashboard-grid">
+                <div>
+                    <div class="kpi-row">
+                        <div class="kpi-card">
+                            <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Tổng lịch hẹn</div>
+                                <div class="kpi-value" id="total-appointments">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background:linear-gradient(135deg,#F9A8D4,#F472B6);">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Tỉ lệ hủy lịch</div>
+                                <div class="kpi-value" id="cancellation-rate">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="gradient-cards">
+                        <div class="gradient-card pink">
+                            <div class="gc-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div class="gc-value" id="total-revenue">0 ₫</div>
+                            <div class="gc-label">Tổng doanh thu khám</div>
+                        </div>
+                        <div class="gradient-card purple">
+                            <div class="gc-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="gc-value" id="total-profit">0 ₫</div>
+                            <div class="gc-label">Tổng lợi nhuận thực tế</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-main">
+                        <h3>Biểu đồ Lịch khám & Doanh thu</h3>
+                        <div class="chart-sub">
+                            <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8B5CF6;"></span> Doanh thu</span>
+                            <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F0ABFC;"></span> Kỳ trước</span>
+                        </div>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div class="progress-card">
+                        <h3>Tiến độ hệ thống</h3>
+                        <div style="text-align:center;padding:20px 0;">
+                            <div style="font-family:'Plus Jakarta Sans';font-size:42px;font-weight:800;color:var(--primary-color);letter-spacing:-0.03em;line-height:1;">89%</div>
+                            <div style="font-size:11px;color:var(--text-gray);text-transform:uppercase;letter-spacing:0.05em;margin-top:6px;">Hoàn thành</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <div style="display:flex;justify-content:space-between;font-size:12.5px;">
+                                <span style="color:var(--text-gray);"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F0ABFC;margin-right:6px;"></span>Lịch hẹn hoàn thành</span>
+                                <span style="font-weight:700;color:var(--secondary-color);" id="stat-done">0</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:12.5px;">
+                                <span style="color:var(--text-gray);"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#A78BFA;margin-right:6px;"></span>Bác sĩ đang trực</span>
+                                <span style="font-weight:700;color:var(--secondary-color);" id="stat-doctors">0</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:12.5px;">
+                                <span style="color:var(--text-gray);"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#C4B5FD;margin-right:6px;"></span>Tổng tài khoản</span>
+                                <span style="font-weight:700;color:var(--secondary-color);" id="stat-accounts">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calendar-card">
+                        <h3>Lịch tháng 10, 2026</h3>
+                        <div class="cal-grid" id="cal-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="panel">
+                <h3>Hoạt động gần đây <a href="nhat_ky_giao_dich.html" class="view-all">Xem tất cả →</a></h3>
+                <div id="recent-activities"></div>
+            </div>
+        </section>
+    </main>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="../../static/js/admin-data.js"></script>
+    <script src="../../static/js/admin.js"></script>
+    <script>
+    (function () {
+        const html = document.documentElement;
+        const saved = localStorage.getItem('mb-admin-theme') ||
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        html.setAttribute('data-theme', saved);
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+                themeBtn.addEventListener('click', () => {
+                    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                    html.setAttribute('data-theme', next);
+                    localStorage.setItem('mb-admin-theme', next);
+                    themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+                    location.reload();
+                });
+            }
+            const menuBtn = document.getElementById('menu-toggle');
+            const closeBtn = document.getElementById('sidebar-close');
+            const sidebar = document.querySelector('aside');
+            const overlay = document.getElementById('sidebar-overlay');
+            function openSidebar() { sidebar.classList.add('open'); if (overlay) overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+            function closeSidebar() { sidebar.classList.remove('open'); if (overlay) overlay.classList.remove('active'); document.body.style.overflow = ''; }
+            if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+            window.addEventListener('resize', () => { if (window.innerWidth > 900) closeSidebar(); });
+
+            // Tự động cập nhật tên Admin động lên Header từ thông tin đăng nhập thực tế
+            if (window.MedBookingAPI && typeof window.MedBookingAPI.getCurrentUser === 'function') {
+                window.MedBookingAPI.getCurrentUser().then(res => {
+                    const data = res.data;
+                    const adminName = data.ho_ten || data.name || '';
+                    const adminNameBtn = document.getElementById('admin-name-btn');
+                    if (adminNameBtn && adminName) {
+                        adminNameBtn.textContent = `AD ${adminName}`;
+                    }
+                }).catch(err => {
+                    console.error("Không thể tải thông tin admin trên header:", err);
+                });
+            }
+
+            // Calendar
+            const calGrid = document.getElementById('cal-grid');
+            if (calGrid) {
+                const dayNames = ['T2','T3','T4','T5','T6','T7','CN'];
+                let htmlCal = dayNames.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+                for (let i = 1; i <= 30; i++) {
+                    const cls = i === 13 ? 'today' : (i === 10 ? 'active' : '');
+                    htmlCal += `<div class="cal-day ${cls}">${i}</div>`;
+                }
+                for (let i = 1; i <= 4; i++) htmlCal += `<div class="cal-day muted">${i}</div>`;
+                calGrid.innerHTML = htmlCal;
+            }
+
+            // Recent activities
+            const actBox = document.getElementById('recent-activities');
+            if (actBox) {
+                const waitAct = setInterval(() => {
+                    if (window.MedBookingAPI && window.MedBookingUtils) {
+                        clearInterval(waitAct);
+                        window.MedBookingAPI.getTransactions({ year: 2026 }).then(res => {
+                            actBox.innerHTML = res.data.slice(0, 4).map(t => `
+                                <div class="activity-item">
+                                    <div class="act-icon"><i class="fas fa-user-check"></i></div>
+                                    <div class="act-body">
+                                        <div class="act-title">${t.patient} - ${t.doctorConfirm || 'Chưa xác nhận'}</div>
+                                        <div class="act-time">${t.updatedAt}</div>
+                                    </div>
+                                    <div class="act-amount">+${window.MedBookingUtils.formatMoney(t.revenue)}</div>
+                                </div>
+                            `).join('');
+                        });
+                    }
+                }, 100);
+            }
+
+            // Stats progress
+            const waitStats = setInterval(() => {
+                if (window.MedBookingAPI) {
+                    clearInterval(waitStats);
+                    Promise.all([
+                        window.MedBookingAPI.getAccounts(),
+                        window.MedBookingAPI.getDoctors(),
+                        window.MedBookingAPI.getTransactions({ year: 2026 })
+                    ]).then(([accRes, docRes, txRes]) => {
+                        const done = document.getElementById('stat-done');
+                        const docs = document.getElementById('stat-doctors');
+                        const accs = document.getElementById('stat-accounts');
+                        if (done) done.textContent = txRes.data.filter(t => t.status === 'completed').length;
+                        if (docs) docs.textContent = docRes.data.filter(d => d.status === 'available').length;
+                        if (accs) accs.textContent = accRes.data.length;
+                    });
+                }
+            }, 100);
+        });
+    })();
+    </script>
+</body>
+</html>

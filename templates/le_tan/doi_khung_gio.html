@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBOOKING - Đổi Khung Giờ Khám</title>
+    <!-- Favicon chuẩn hình trái tim xanh dương -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="../../static/css/LT_BS.css">
+    
+    <style>
+        main { max-width: 900px; margin: 30px auto 80px; padding: 0 20px; }
+
+        .change-time-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 35px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+        }
+
+        /* Current appointment info */
+        .current-info {
+            background: linear-gradient(135deg, var(--primary-blue-light), var(--primary-blue-soft));
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .current-info h4 {
+            font-size: 15px;
+            color: var(--primary-blue);
+            margin-bottom: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .current-info .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .current-info .item .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-gray);
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .current-info .item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        /* Time slots */
+        .time-slots-section h4 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .time-slots-section h4 i {
+            color: var(--primary-blue);
+        }
+
+        .time-slots-section {
+            margin-bottom: 25px;
+        }
+
+        .time-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .time-slot { position: relative; }
+        .time-slot input[type="radio"] { display: none; }
+
+        .time-slot label {
+            display: block;
+            text-align: center;
+            padding: 12px 10px;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            background: var(--input-bg);
+            color: var(--text-gray);
+            transition: all 0.3s;
+        }
+
+        .time-slot label:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: var(--primary-blue-light);
+        }
+
+        .time-slot input[type="radio"]:checked + label {
+            background: var(--primary-blue);
+            border-color: var(--primary-blue);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        .time-slot label .price-note {
+            display: block;
+            font-size: 10px;
+            font-weight: 400;
+            margin-top: 3px;
+            opacity: 0.8;
+        }
+
+        .time-slot label.disabled,
+        .time-slot input[type="radio"]:disabled + label {
+            opacity: 0.4;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            background: var(--bg-body);
+            border-color: var(--border-color);
+            color: var(--text-gray);
+        }
+
+        .time-slot label.disabled:hover,
+        .time-slot input[type="radio"]:disabled + label:hover {
+            background: var(--bg-body);
+            border-color: var(--border-color);
+            color: var(--text-gray);
+            transform: none;
+        }
+
+        .time-slot label .slot-note {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 3px;
+            color: var(--accent-red);
+            text-transform: uppercase;
+        }
+
+        /* Actions */
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        /* Nút đăng xuất đồng bộ */
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EF4444;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover {
+            background: #EF4444;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .change-time-card { padding: 22px; }
+            .form-actions { flex-direction: column; }
+            .form-actions .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Cổng Lễ Tân</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/le_tan/dashboard.html">Tổng quan</a></li>
+                    <li><a href="/le_tan/quan_ly_lich_hen.html"><strong>Quản lý lịch hẹn</strong></a></li>
+                    <li><a href="/le_tan/danh_sach_lich_hen.html">Danh sách ca trực</a></li>
+                    <li><a href="/le_tan/check_in.html">Check-in</a></li>
+                    <li><a href="/le_tan/vien_phi.html">Viện phí</a></li>
+                </ul>
+            </nav>
+            <div class="user-badge" onclick="window.location.href='ho_so_ca_nhan.html'">
+                <div class="user-avatar" id="topbar-avatar">LT</div>
+                <div class="user-info-text">
+                    <div class="user-name" id="topbar-receptionist-name">Lễ tân</div>
+                    <div class="user-role">Lễ tân</div>
+                </div>
+            </div>
+            <!-- Nút chuyển giao diện sáng/tối -->
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi giao diện">
+                <i class="fas fa-moon"></i>
+            </button>
+            <!-- Nút Đăng xuất nằm cạnh nút giao diện -->
+            <button class="logout-btn" onclick="window.location.href='../dk_dn/dn.html'" title="Đăng xuất">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="quan_ly_lich_hen.html">Quản lý lịch hẹn</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Đổi khung giờ</span>
+        </div>
+
+        <div class="page-title">
+            <div class="page-title-left">
+                <h2><i class="fas fa-clock"></i> Đổi Khung Giờ Khám</h2>
+                <p>Chọn khung giờ mới cho lịch hẹn của bệnh nhân</p>
+            </div>
+        </div>
+
+        <div class="change-time-card">
+            <!-- Current info -->
+            <div class="current-info">
+                <h4><i class="fas fa-info-circle"></i> Thông tin lịch hẹn hiện tại</h4>
+                <div class="grid">
+                    <div class="item">
+                        <div class="label">Mã lịch hẹn</div>
+                        <div class="value" id="info-id">LH102</div>
+                    </div>
+                    <div class="item">
+                        <div class="label">Bệnh nhân</div>
+                        <div class="value" id="info-patient">Trần Thị B</div>
+                    </div>
+                    <div class="item">
+                        <div class="label">Bác sĩ</div>
+                        <div class="value" id="info-doctor">BS.CKI Trần Thị C</div>
+                    </div>
+                    <div class="item">
+                        <div class="label">Khung giờ hiện tại</div>
+                        <div class="value" id="info-current-time">18:30 - 19:30 (Ca tối)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New time selection -->
+            <form onsubmit="event.preventDefault(); submitChange();">
+                <h4 style="margin-bottom: 20px; color: var(--secondary-color);">
+                    <i class="fas fa-clock" style="color: var(--primary-blue);"></i> Chọn khung giờ mới
+                </h4>
+
+                <!-- Ca sáng -->
+                <div class="time-slots-section">
+                    <h4><i class="fas fa-sun" style="color: #F39C12;"></i> Ca sáng (07:30 - 11:30)</h4>
+                    <div class="time-slots-grid">
+                        <div class="time-slot"><input type="radio" id="t1" name="new_time" value="07:30-08:30"><label for="t1">07:30 - 08:30</label></div>
+                        <div class="time-slot"><input type="radio" id="t2" name="new_time" value="08:30-09:30"><label for="t2">08:30 - 09:30</label></div>
+                        <div class="time-slot"><input type="radio" id="t3" name="new_time" value="09:30-10:30"><label for="t3">09:30 - 10:30</label></div>
+                        <div class="time-slot"><input type="radio" id="t4" name="new_time" value="10:30-11:30"><label for="t4">10:30 - 11:30</label></div>
+                    </div>
+                </div>
+
+                <!-- Ca chiều -->
+                <div class="time-slots-section">
+                    <h4><i class="fas fa-cloud-sun" style="color: var(--primary-blue);"></i> Ca chiều (13:30 - 18:30)</h4>
+                    <div class="time-slots-grid">
+                        <div class="time-slot"><input type="radio" id="t5" name="new_time" value="13:30-14:30"><label for="t5">13:30 - 14:30</label></div>
+                        <div class="time-slot"><input type="radio" id="t6" name="new_time" value="14:30-15:30"><label for="t6">14:30 - 15:30</label></div>
+                        <div class="time-slot"><input type="radio" id="t7" name="new_time" value="15:30-16:30"><label for="t7">15:30 - 16:30</label></div>
+                        <div class="time-slot"><input type="radio" id="t8" name="new_time" value="16:30-17:30"><label for="t8">16:30 - 17:30</label></div>
+                        <div class="time-slot"><input type="radio" id="t9" name="new_time" value="17:30-18:30"><label for="t9">17:30 - 18:30</label></div>
+                    </div>
+                </div>
+
+                <!-- Ca tối -->
+                <div class="time-slots-section">
+                    <h4><i class="fas fa-moon" style="color: var(--accent-purple);"></i> Ca tối ngoài giờ (18:30 - 22:30)</h4>
+                    <div class="time-slots-grid">
+                        <div class="time-slot"><input type="radio" id="t10" name="new_time" value="18:30-19:30"><label for="t10">18:30 - 19:30 <span class="price-note">+10% phí</span></label></div>
+                        <div class="time-slot"><input type="radio" id="t11" name="new_time" value="19:30-20:30"><label for="t11">19:30 - 20:30 <span class="price-note">+10% phí</span></label></div>
+                        <div class="time-slot"><input type="radio" id="t12" name="new_time" value="20:30-21:30"><label for="t12">20:30 - 21:30 <span class="price-note">+10% phí</span></label></div>
+                        <div class="time-slot"><input type="radio" id="t13" name="new_time" value="21:30-22:30"><label for="t13">21:30 - 22:30 <span class="price-note">+10% phí</span></label></div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <a href="quan_ly_lich_hen.html" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check"></i> Cập nhật khung giờ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Cổng Lễ Tân</p>
+                </div>
+            </div>
+            <p>Hệ thống quản lý y tế MedBooking - Giải pháp toàn diện cho bệnh viện và phòng khám.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="dashboard.html">Tổng quan</a></li>
+                <li><a href="quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                <li><a href="check_in.html">Check-in</a></li>
+                <li><a href="vien_phi.html">Viện phí</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon"><i class="fas fa-info"></i></div>
+            <h3 id="modal-title">Thông báo</h3>
+            <div class="modal-details" id="modal-details" style="display: none;"></div>
+            <p id="modal-message">Nội dung thông báo</p>
+            <div class="modal-actions" id="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="modal-confirm-btn">
+                    <i class="fas fa-check"></i> Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../static/js/client.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ============================================================
+            // ĐỒNG BỘ THÔNG TIN LỄ TÂN TỪ LOCALSTORAGE
+            // ============================================================
+            try {
+                let receptionistName = 'Lễ tân';
+                const loggedInUser = localStorage.getItem('medbooking_logged_in_user');
+                const currentUser = localStorage.getItem('medbooking_current_user');
+                const currentEmail = localStorage.getItem('medbooking_email');
+
+                if (loggedInUser) {
+                    const userData = JSON.parse(loggedInUser);
+                    receptionistName = userData.name || userData.fullname || userData.ho_ten || receptionistName;
+                } else if (currentUser) {
+                    const userData = JSON.parse(currentUser);
+                    receptionistName = userData.name || userData.fullname || userData.ho_ten || receptionistName;
+                } else if (currentEmail) {
+                    const users = JSON.parse(localStorage.getItem('medbooking_users')) || [];
+                    const found = users.find(u => u.email === currentEmail);
+                    if (found) {
+                        receptionistName = found.fullname || found.name || receptionistName;
+                    }
+                }
+
+                const topbarNameEl = document.getElementById('topbar-receptionist-name');
+                if (topbarNameEl) topbarNameEl.textContent = receptionistName;
+
+                const cleanName = receptionistName.trim();
+                const parts = cleanName.split(/\s+/);
+                let initials = 'LT';
+                if (parts.length >= 2) {
+                    initials = (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+                } else if (parts.length === 1 && parts[0].length > 0) {
+                    initials = parts[0].slice(0, 2).toUpperCase();
+                }
+
+                const topbarAvatar = document.getElementById('topbar-avatar');
+                if (topbarAvatar) topbarAvatar.textContent = initials;
+
+            } catch (e) {
+                console.error("Không thể tải thông tin lễ tân từ localStorage:", e);
+            }
+
+            // THEME
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+
+            // MODAL
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalDetails = document.getElementById('modal-details');
+            const modalActions = document.getElementById('modal-actions');
+
+            window.showAlert = function(title, message, type = 'info', callback = null, details = null) {
+                modalIcon.className = 'modal-icon ' + type;
+                const iconEl = modalIcon.querySelector('i');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+                iconEl.className = 'fas ' + icons[type];
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                
+                if (details && Object.keys(details).length > 0) {
+                    let detailHTML = '';
+                    for (const [key, value] of Object.entries(details)) {
+                        detailHTML += `<div class="detail-row"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+                    }
+                    modalDetails.innerHTML = detailHTML;
+                    modalDetails.style.display = 'block';
+                } else {
+                    modalDetails.style.display = 'none';
+                }
+                
+                modalActions.innerHTML = `<button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đã hiểu</button>`;
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-confirm-btn').onclick = function() {
+                    closeModal();
+                    if (callback) callback();
+                };
+            };
+
+            function closeModal() { modalOverlay.classList.remove('active'); }
+            modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
+
+            // DATA
+            const appointmentData = {
+                'LH101': { patient: 'Nguyễn Văn X', doctor: 'ThS.BS Nguyễn Văn A', currentTime: '08:30 - 09:30 (Ca sáng)', bookedSlots: ['07:30-08:30'] },
+                'LH102': { patient: 'Trần Thị B', doctor: 'BS.CKI Trần Thị C', currentTime: '18:30 - 19:30 (Ca tối)', bookedSlots: ['08:30-09:30', '09:30-10:30', '18:30-19:30'] },
+                'LH103': { patient: 'Lê Thị M', doctor: 'BS.CKI Trần Thị C', currentTime: '09:00 - 10:00 (Ca sáng)', bookedSlots: ['14:30-15:30'] }
+            };
+
+            // Load appointment
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id') || 'LH102';
+            const appt = appointmentData[id] || appointmentData['LH102'];
+
+            document.getElementById('info-id').textContent = id;
+            document.getElementById('info-patient').textContent = appt.patient;
+            document.getElementById('info-doctor').textContent = appt.doctor;
+            document.getElementById('info-current-time').textContent = appt.currentTime;
+
+            // Disable booked slots
+            appt.bookedSlots.forEach(slot => {
+                document.querySelectorAll('input[name="new_time"]').forEach(input => {
+                    if (input.value === slot) {
+                        input.disabled = true;
+                        const label = document.querySelector(`label[for="${input.id}"]`);
+                        label.classList.add('disabled');
+                        const note = document.createElement('span');
+                        note.className = 'slot-note';
+                        note.textContent = 'Đã đặt';
+                        label.appendChild(note);
+                    }
+                });
+            });
+
+            // Submit
+            window.submitChange = function() {
+                const selected = document.querySelector('input[name="new_time"]:checked');
+                if (!selected) {
+                    showAlert('Thiếu thông tin', 'Vui lòng chọn khung giờ mới!', 'warning');
+                    return;
+                }
+
+                const newTime = selected.value;
+                const ca = newTime.startsWith('1') && parseInt(newTime) >= 18 ? 'Ca tối' :
+                          newTime.startsWith('07') || newTime.startsWith('08') || newTime.startsWith('09') || newTime.startsWith('10') || newTime.startsWith('11') ? 'Ca sáng' : 'Ca chiều';
+
+                showAlert(
+                    'Cập nhật thành công! 🎉',
+                    `Khung giờ khám của bệnh nhân ${appt.patient} đã được cập nhật.`,
+                    'success',
+                    function() {
+                        window.location.href = 'quan_ly_lich_hen.html';
+                    },
+                    {
+                        'Mã LH': id,
+                        'Bệnh nhân': appt.patient,
+                        'Bác sĩ': appt.doctor,
+                        'Khung giờ cũ': appt.currentTime,
+                        'Khung giờ mới': `${newTime} (${ca})`,
+                        'Thông báo': 'Đã gửi SMS cho bệnh nhân'
+                    }
+                );
+            };
+        });
+    </script>
+</body>
+</html>

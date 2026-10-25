@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Hồ sơ cá nhân</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/A.css">
+
+    <style>
+        /* Định dạng phông chữ thương hiệu MedBooking */
+        .brand-name {
+            font-family: 'Quicksand', sans-serif !important;
+            font-weight: 700 !important;
+            text-transform: none !important;
+            letter-spacing: -0.01em;
+        }
+
+        body { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg-body); }
+        body > header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 16px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        body > header h1 {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        /* Hiệu ứng hover sáng lên giống nút thông báo bên Dashboard */
+        body > header nav a {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 16px;
+            background: var(--primary-light);
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+        body > header nav a:hover {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        body > main {
+            flex: 1;
+            max-width: 720px;
+            margin: 40px auto;
+            padding: 0 24px;
+            width: 100%;
+        }
+        body > main section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-soft);
+        }
+        body > main section h3 {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 22px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        body > main section h3::before {
+            content: '';
+            width: 4px; height: 16px; border-radius: 4px;
+            background: var(--primary-gradient);
+        }
+        body > footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-gray);
+            font-size: 12.5px;
+            border-top: 1px solid var(--border-glass);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Hồ sơ Quản trị viên</h1>
+        <nav><a href="/admin/home_a.html"><i class="fas fa-arrow-left"></i> Quay lại trang chủ </a></nav>
+    </header>
+
+    <main>
+        <section>
+            <h3>Thông tin tài khoản Admin</h3>
+            <form id="form-profile">
+                <p id="admin-code-container" style="margin-bottom:16px; color: var(--secondary-color);"><strong>Mã quản trị viên:</strong> Đang tải...</p>
+                <div style="margin-bottom:16px;">
+                    <label for="profile-name" style="display:block; margin-bottom:6px; font-weight:500; color: var(--secondary-color);">Họ và tên:</label>
+                    <input type="text" id="profile-name" style="width:100%; max-width:100%; padding:10px 14px; border:1px solid var(--border-glass); border-radius:12px; background:var(--bg-card); color:var(--secondary-color);">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label for="profile-email" style="display:block; margin-bottom:6px; font-weight:500; color: var(--secondary-color);">Email liên hệ:</label>
+                    <input type="email" id="profile-email" style="width:100%; max-width:100%; padding:10px 14px; border:1px solid var(--border-glass); border-radius:12px; background:var(--bg-card); color:var(--secondary-color);">
+                </div>
+                <button type="submit" class="btn-primary" style="padding:11px 22px; border-radius:50px; background:var(--primary-color); color:#fff; border:none; font-weight:600; cursor:pointer;">
+                    <i class="fas fa-save"></i> Cập nhật thông tin
+                </button>
+            </form>
+        </section>
+
+        <section>
+            <h3>Đổi mật khẩu bảo mật</h3>
+            <form id="form-password">
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:500; color: var(--secondary-color);">Mật khẩu hiện tại:</label>
+                    <input type="password" style="width:100%; max-width:100%; padding:10px 14px; border:1px solid var(--border-glass); border-radius:12px; background:var(--bg-card); color:var(--secondary-color);">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:500; color: var(--secondary-color);">Mật khẩu mới:</label>
+                    <input type="password" style="width:100%; max-width:100%; padding:10px 14px; border:1px solid var(--border-glass); border-radius:12px; background:var(--bg-card); color:var(--secondary-color);">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:500; color: var(--secondary-color);">Xác nhận mật khẩu mới:</label>
+                    <input type="password" style="width:100%; max-width:100%; padding:10px 14px; border:1px solid var(--border-glass); border-radius:12px; background:var(--bg-card); color:var(--secondary-color);">
+                </div>
+                <button type="submit" class="btn-primary" style="padding:11px 22px; border-radius:50px; background:var(--primary-color); color:#fff; border:none; font-weight:600; cursor:pointer;">
+                    <i class="fas fa-lock"></i> Đổi mật khẩu
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <footer>&copy; 2026 <span class="brand-name">MedBooking</span>. All rights reserved.</footer>
+
+<script src="/static/js/admin-data.js"></script>
+<script src="/static/js/admin.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async function() {
+    let currentUserId = 'AD001';
+
+    try {
+        if (window.MedBookingAPI && typeof window.MedBookingAPI.getCurrentUser === 'function') {
+            let res = await window.MedBookingAPI.getCurrentUser();
+            let data = res.data;
+
+            currentUserId = data.ma_quan_tri || data.id || 'AD001';
+
+            // Cập nhật Họ và tên động từ tài khoản đăng nhập
+            const nameInput = document.getElementById('profile-name');
+            if (nameInput) nameInput.value = data.ho_ten || data.name || '';
+
+            // Cập nhật Email động từ tài khoản đăng nhập
+            const emailInput = document.getElementById('profile-email');
+            if (emailInput) emailInput.value = data.email || '';
+
+            // Cập nhật Mã quản trị viên tương ứng
+            const codeContainer = document.getElementById('admin-code-container');
+            if (codeContainer) {
+                codeContainer.innerHTML = `<strong>Mã quản trị viên:</strong> ${currentUserId}`;
+            }
+        }
+    } catch (error) {
+        console.error("Không thể tải thông tin profile:", error);
+    }
+
+    // Xử lý sự kiện khi bấm nút "Cập nhật thông tin"
+    const profileForm = document.getElementById('form-profile');
+    if (profileForm) {
+        profileForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const newName = document.getElementById('profile-name').value.trim();
+            const newEmail = document.getElementById('profile-email').value.trim();
+
+            const updatedData = {
+                id: currentUserId,
+                ma_quan_tri: currentUserId,
+                name: newName,
+                ho_ten: newName,
+                email: newEmail
+            };
+
+            // Lưu vào localStorage phiên đăng nhập hiện tại
+            localStorage.setItem('medbooking_logged_in_user', JSON.stringify(updatedData));
+
+            // Cập nhật qua API nếu có hỗ trợ
+            if (window.MedBookingAPI && typeof window.MedBookingAPI.updateCurrentUser === 'function') {
+                await window.MedBookingAPI.updateCurrentUser(updatedData);
+            }
+
+            alert('Cập nhật thông tin thành công!');
+            location.reload();
+        });
+    }
+});
+</script>
+</body>
+</html>

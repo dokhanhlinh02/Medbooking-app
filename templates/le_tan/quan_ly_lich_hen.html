@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBOOKING - Quản lý Lịch hẹn</title>
+    <!-- Favicon hình chú chim cánh cụt y tế -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/LT_BS.css">
+    
+    <style>
+        main { max-width: 1400px; margin: 30px auto 80px; padding: 0 20px; }
+
+        .filter-bar {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.5fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-bar .form-group { margin-bottom: 0; }
+        .search-input-wrapper { position: relative; }
+        .search-input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-gray);
+            font-size: 14px;
+            pointer-events: none;
+        }
+        .search-input-wrapper input { padding-left: 40px !important; }
+        .filter-actions { display: flex; gap: 10px; }
+
+        .quick-dates {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .quick-date-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .quick-date-btn:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: var(--primary-blue-light);
+        }
+        .quick-date-btn.active {
+            background: var(--primary-blue);
+            color: #fff;
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        .alert-banner {
+            background: linear-gradient(135deg, #FFF3CD, #FFE9A8);
+            border-left: 4px solid var(--accent-orange);
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #856404;
+            font-size: 14px;
+            animation: slideDown 0.5s ease-out;
+        }
+        .alert-banner i { font-size: 20px; flex-shrink: 0; }
+        .alert-banner strong { display: block; margin-bottom: 3px; }
+        .alert-banner .dismiss-btn {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: #856404;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .alert-banner .dismiss-btn:hover { background: rgba(0,0,0,0.1); }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        [data-theme="dark"] .alert-banner {
+            background: linear-gradient(135deg, #4A3F1A, #3D3416);
+            color: #FFD966;
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, var(--primary-blue-light), var(--primary-blue-soft));
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary-blue);
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .group-header-left { display: flex; align-items: center; gap: 12px; }
+        .group-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-blue), #6FB1F5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .group-info h4 {
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            margin-bottom: 2px;
+            color: var(--secondary-color);
+        }
+        .group-info p { font-size: 12px; color: var(--text-gray); margin: 0; }
+        .group-select-all {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--primary-blue);
+            cursor: pointer;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+        .group-select-all:hover { background: rgba(74, 144, 226, 0.1); }
+        .group-select-all input {
+            width: 16px; height: 16px;
+            accent-color: var(--primary-blue);
+            cursor: pointer;
+        }
+
+        .appointment-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            display: grid;
+            grid-template-columns: auto auto 1fr auto;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        .appointment-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+        }
+        .appointment-card[data-status="pending"]::before { background: var(--accent-orange); }
+        .appointment-card[data-status="confirmed"]::before { background: var(--primary-blue); }
+        .appointment-card[data-status="checked"]::before { background: var(--accent-green); }
+        .appointment-card[data-status="cancelled"]::before { background: var(--text-gray); }
+        .appointment-card[data-status="noshow"]::before { background: var(--accent-red); }
+
+        .appointment-card.just-updated {
+            animation: highlightCard 1.5s ease-out;
+        }
+        @keyframes highlightCard {
+            0% { background: var(--accent-green-light); transform: scale(1.02); }
+            100% { background: var(--bg-card); transform: scale(1); }
+        }
+
+        .appointment-card.locked {
+            opacity: 0.5;
+            pointer-events: none;
+            position: relative;
+        }
+        .appointment-card.locked::after {
+            content: '\f023';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        .appt-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-blue);
+            cursor: pointer;
+        }
+        .appt-checkbox:disabled { cursor: not-allowed; opacity: 0.4; }
+
+        .appt-time-box {
+            text-align: center;
+            padding: 12px 14px;
+            background: var(--primary-blue-light);
+            border-radius: 12px;
+            min-width: 95px;
+            position: relative;
+        }
+        .appt-time-box .time {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-family: 'Poppins', sans-serif;
+            line-height: 1;
+        }
+        .appt-time-box .ca {
+            font-size: 10px;
+            color: var(--text-gray);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .appt-time-box .badge-urgent {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--accent-red);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 3px 8px rgba(231, 76, 60, 0.4);
+            animation: pulse-badge 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .appt-time-box .badge-overdue {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--accent-orange);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 3px 8px rgba(243, 156, 18, 0.4);
+        }
+        .appt-time-box.past { background: var(--bg-body); }
+        .appt-time-box.past .time { color: var(--text-gray); }
+
+        .appt-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .appt-info h4 .appt-code {
+            font-weight: 400;
+            color: var(--text-gray);
+            font-size: 12px;
+            background: var(--bg-body);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        .appt-info .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+        .appt-info .meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .appt-info .meta i { color: var(--primary-blue); }
+        .appt-info .note {
+            font-size: 12px;
+            color: var(--text-gray);
+            font-style: italic;
+            padding: 6px 10px;
+            background: var(--bg-body);
+            border-radius: 6px;
+            border-left: 3px solid var(--primary-blue-light);
+        }
+
+        .appt-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 150px;
+            align-items: stretch;
+        }
+        .appt-actions .status-badge { justify-content: center; margin-bottom: 5px; }
+        .appt-actions .btn { justify-content: center; padding: 8px 14px; font-size: 12px; }
+
+        .bulk-action-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: var(--bg-card);
+            border-radius: 50px;
+            padding: 12px 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 999;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 90%;
+        }
+        .bulk-action-bar.active { transform: translateX(-50%) translateY(0); }
+        .bulk-count {
+            background: var(--primary-blue);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            white-space: nowrap;
+        }
+        .bulk-group-info {
+            font-size: 12px;
+            color: var(--text-gray);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bulk-actions { display: flex; gap: 8px; }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-gray);
+        }
+        .empty-state i {
+            font-size: 72px;
+            color: var(--primary-blue-light);
+            margin-bottom: 20px;
+        }
+        .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--secondary-color); }
+        .empty-state p { font-size: 14px; margin-bottom: 20px; }
+
+        .time-picker-modal {
+            max-width: 700px !important;
+            text-align: left !important;
+            padding: 32px !important;
+        }
+        .time-picker-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+        .time-picker-header-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-blue), #6FB1F5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .time-picker-header-text h3 {
+            font-size: 20px;
+            margin-bottom: 3px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            text-align: left;
+        }
+        .time-picker-header-text p { font-size: 13px; color: var(--text-gray); margin: 0; }
+
+        .current-appt-info {
+            background: var(--primary-blue-light);
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+        }
+        .current-appt-info .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+        .current-appt-info .row .label { color: var(--text-gray); }
+        .current-appt-info .row .value { font-weight: 600; color: var(--secondary-color); }
+
+        .time-picker-section { margin-bottom: 20px; }
+        .time-picker-section h4 {
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--secondary-color);
+        }
+        .time-picker-section h4 i { color: var(--primary-blue); }
+        .time-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+        .time-slot { position: relative; }
+        .time-slot input { display: none; }
+        .time-slot label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 8px;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-gray);
+            background: var(--input-bg);
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .time-slot label:hover:not(.disabled) {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: var(--primary-blue-light);
+            transform: translateY(-2px);
+        }
+        .time-slot input:checked + label {
+            background: var(--primary-blue);
+            color: #fff;
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        .time-slot label.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            background: var(--bg-body);
+            border-color: var(--border-color);
+        }
+        .time-slot label .slot-note {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 4px;
+            color: var(--accent-red);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .time-slot label.disabled .slot-note { color: var(--text-gray); }
+        .time-slot label.current-slot {
+            border-color: var(--accent-orange);
+            background: var(--accent-orange-light);
+            color: var(--accent-orange);
+        }
+        .time-picker-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding-top: 18px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+
+        /* Nút đăng xuất đồng bộ */
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EF4444;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover {
+            background: #EF4444;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 1100px) {
+            .filter-bar { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 900px) {
+            .filter-bar { grid-template-columns: 1fr; }
+            .appointment-card { grid-template-columns: auto auto 1fr; }
+            .appt-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                flex-wrap: wrap;
+                min-width: unset;
+            }
+            .appt-actions .status-badge { margin-bottom: 0; }
+            .bulk-action-bar { flex-direction: column; padding: 15px; border-radius: 20px; }
+            .time-picker-actions { flex-direction: column; }
+            .time-picker-actions .btn { width: 100%; justify-content: center; }
+        }
+        @media (max-width: 600px) {
+            .appointment-card { grid-template-columns: 1fr; text-align: center; }
+            .appt-checkbox { margin: 0 auto; }
+            .appt-time-box { margin: 0 auto; }
+            .appt-info .meta { justify-content: center; }
+            .appt-info h4 { justify-content: center; }
+            .time-slots-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Cổng Lễ Tân</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/le_tan/dashboard.html">Tổng quan</a></li>
+                    <li><a href="/le_tan/quan_ly_lich_hen.html"><strong>Quản lý lịch hẹn</strong></a></li>
+                    <li><a href="/le_tan/danh_sach_lich_hen.html">Danh sách ca trực</a></li>
+                    <li><a href="/le_tan/check_in.html">Check-in</a></li>
+                    <li><a href="/le_tan/vien_phi.html">Viện phí</a></li>
+                </ul>
+            </nav>
+            <div class="user-badge" onclick="window.location.href='ho_so_ca_nhan.html'">
+                <div class="user-avatar" id="topbar-avatar">LT</div>
+                <div class="user-info-text">
+                    <div class="user-name" id="topbar-receptionist-name">Lễ tân</div>
+                    <div class="user-role">Lễ tân</div>
+                </div>
+            </div>
+            <!-- Nút chuyển giao diện sáng/tối -->
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi giao diện">
+                <i class="fas fa-moon"></i>
+            </button>
+            <!-- Nút Đăng xuất nằm cạnh nút giao diện -->
+            <button class="logout-btn" onclick="window.location.href='../dk_dn/dn.html'" title="Đăng xuất">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Quản lý lịch hẹn</span>
+        </div>
+
+        <div class="page-title">
+            <div class="page-title-left">
+                <h2><i class="fas fa-calendar-alt"></i> Quản lý Lịch hẹn</h2>
+                <p>Xem, xác nhận, đổi giờ và hủy lịch hẹn của bệnh nhân</p>
+            </div>
+            <div>
+                <button class="btn btn-outline" onclick="exportExcel()">
+                    <i class="fas fa-file-excel"></i> Xuất Excel
+                </button>
+                <button class="btn btn-primary" onclick="window.location.href='check_in.html'">
+                    <i class="fas fa-sign-in-alt"></i> Check-in mới
+                </button>
+            </div>
+        </div>
+
+        <div id="overnight-alert-container"></div>
+
+        <div class="stats-grid">
+            <div class="stat-card orange">
+                <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                <div class="stat-info">
+                    <h4 id="stat-pending">0</h4>
+                    <p>Chờ xác nhận</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <h4 id="stat-confirmed">0</h4>
+                    <p>Đã xác nhận</p>
+                </div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                <div class="stat-info">
+                    <h4 id="stat-checked">0</h4>
+                    <p>Đã check-in</p>
+                </div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                <div class="stat-info">
+                    <h4 id="stat-noshow">0</h4>
+                    <p>Không đến</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-dates">
+            <button class="quick-date-btn active" data-quick="today" onclick="quickDate('today')">
+                <i class="fas fa-calendar-day"></i> Hôm nay
+            </button>
+            <button class="quick-date-btn" data-quick="tomorrow" onclick="quickDate('tomorrow')">
+                <i class="fas fa-calendar-plus"></i> Ngày mai
+            </button>
+            <button class="quick-date-btn" data-quick="week" onclick="quickDate('week')">
+                <i class="fas fa-calendar-week"></i> Tuần này
+            </button>
+            <button class="quick-date-btn" data-quick="all" onclick="quickDate('all')">
+                <i class="fas fa-calendar-alt"></i> Tất cả
+            </button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="form-group">
+                <label for="filter-ca">Ca trực</label>
+                <select id="filter-ca" onchange="applyFilter()">
+                    <option value="">-- Tất cả ca --</option>
+                    <option value="sang">Ca sáng (07:30 - 11:30)</option>
+                    <option value="chieu">Ca chiều (13:30 - 18:30)</option>
+                    <option value="toi">Ca tối (18:30 - 22:30)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="filter-doctor">Bác sĩ</label>
+                <select id="filter-doctor" onchange="applyFilter()">
+                    <option value="">-- Tất cả bác sĩ --</option>
+                    <option value="bs01">ThS.BS Nguyễn Văn A</option>
+                    <option value="bs02">BS.CKI Trần Thị C</option>
+                    <option value="bs03">TS.BS Lê Hoàng D</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="filter-keyword">Tìm kiếm</label>
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="filter-keyword" placeholder="Mã LH, tên BN, SĐT..." oninput="applyFilter()">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-outline" onclick="resetFilter()">
+                    <i class="fas fa-redo"></i> Đặt lại
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all" onclick="switchTab('all')">
+                <i class="fas fa-list"></i> Tất cả <span class="count" id="count-all">0</span>
+            </button>
+            <button class="filter-tab" data-filter="pending" onclick="switchTab('pending')">
+                <i class="fas fa-hourglass-half"></i> Chờ xác nhận <span class="count" id="count-pending">0</span>
+            </button>
+            <button class="filter-tab" data-filter="confirmed" onclick="switchTab('confirmed')">
+                <i class="fas fa-check-circle"></i> Đã xác nhận <span class="count" id="count-confirmed">0</span>
+            </button>
+            <button class="filter-tab" data-filter="checked" onclick="switchTab('checked')">
+                <i class="fas fa-user-check"></i> Đã check-in <span class="count" id="count-checked">0</span>
+            </button>
+            <button class="filter-tab" data-filter="noshow" onclick="switchTab('noshow')">
+                <i class="fas fa-user-slash"></i> Không đến <span class="count" id="count-noshow">0</span>
+            </button>
+        </div>
+
+        <div id="appointments-list"></div>
+    </main>
+
+    <div class="bulk-action-bar" id="bulk-bar">
+        <div class="bulk-count"><span id="bulk-count">0</span> đã chọn</div>
+        <div class="bulk-group-info" id="bulk-group-info"></div>
+        <div class="bulk-actions">
+            <button class="btn btn-success btn-sm" onclick="bulkConfirm()" id="bulk-btn-confirm">
+                <i class="fas fa-check"></i> Xác nhận
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="bulkCancel()" id="bulk-btn-cancel">
+                <i class="fas fa-times"></i> Hủy
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="clearSelection()">
+                <i class="fas fa-times-circle"></i> Bỏ chọn
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Cổng Lễ Tân</p>
+                </div>
+            </div>
+            <p>Hệ thống quản lý y tế MedBooking - Giải pháp toàn diện cho bệnh viện và phòng khám.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="dashboard.html">Tổng quan</a></li>
+                <li><a href="quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                <li><a href="check_in.html">Check-in</a></li>
+                <li><a href="vien_phi.html">Viện phí</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box" id="modal-box-main">
+            <div class="modal-icon" id="modal-icon"><i class="fas fa-info"></i></div>
+            <h3 id="modal-title">Thông báo</h3>
+            <div class="modal-details" id="modal-details" style="display: none;"></div>
+            <p id="modal-message">Nội dung thông báo</p>
+            <div class="modal-actions" id="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="modal-confirm-btn">
+                    <i class="fas fa-check"></i> Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="time-picker-overlay">
+        <div class="modal-box time-picker-modal">
+            <div class="time-picker-header">
+                <div class="time-picker-header-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="time-picker-header-text">
+                    <h3>Đổi khung giờ khám</h3>
+                    <p>Chọn khung giờ mới cho lịch hẹn</p>
+                </div>
+            </div>
+            <div class="current-appt-info" id="current-appt-info"></div>
+            <div id="time-picker-content"></div>
+            <div class="time-picker-actions">
+                <button class="btn btn-outline" onclick="closeTimePicker()">
+                    <i class="fas fa-times"></i> Hủy bỏ
+                </button>
+                <button class="btn btn-primary" onclick="submitChangeTime()" id="btn-submit-time">
+                    <i class="fas fa-check"></i> Cập nhật khung giờ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../static/js/client.js"></script>
+    <script src="../../static/js/LT_Store.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ============================================================
+            // ĐỒNG BỘ THÔNG TIN ĐĂNG NHẬP TỪ LOCALSTORAGE
+            // ============================================================
+            try {
+                let receptionistName = 'Lễ tân';
+                const loggedInUser = localStorage.getItem('medbooking_logged_in_user');
+                const currentUser = localStorage.getItem('medbooking_current_user');
+                const currentEmail = localStorage.getItem('medbooking_email');
+
+                if (loggedInUser) {
+                    const userData = JSON.parse(loggedInUser);
+                    receptionistName = userData.name || userData.fullname || userData.ho_ten || receptionistName;
+                } else if (currentUser) {
+                    const userData = JSON.parse(currentUser);
+                    receptionistName = userData.name || userData.fullname || userData.ho_ten || receptionistName;
+                } else if (currentEmail) {
+                    const users = JSON.parse(localStorage.getItem('medbooking_users')) || [];
+                    const found = users.find(u => u.email === currentEmail);
+                    if (found) {
+                        receptionistName = found.fullname || found.name || receptionistName;
+                    }
+                }
+
+                const topbarNameEl = document.getElementById('topbar-receptionist-name');
+                if (topbarNameEl) topbarNameEl.textContent = receptionistName;
+
+                const cleanName = receptionistName.trim();
+                const parts = cleanName.split(/\s+/);
+                let initials = 'LT';
+                if (parts.length >= 2) {
+                    initials = (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+                } else if (parts.length === 1 && parts[0].length > 0) {
+                    initials = parts[0].slice(0, 2).toUpperCase();
+                }
+
+                const topbarAvatar = document.getElementById('topbar-avatar');
+                if (topbarAvatar) topbarAvatar.textContent = initials;
+
+            } catch (e) {
+                console.error("Không thể tải thông tin lễ tân từ localStorage:", e);
+            }
+
+            // THEME
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+
+            // MODAL SYSTEM
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalDetails = document.getElementById('modal-details');
+            const modalActions = document.getElementById('modal-actions');
+
+            window.showAlert = function(title, message, type = 'info', callback = null, details = null) {
+                modalIcon.className = 'modal-icon ' + type;
+                const iconEl = modalIcon.querySelector('i');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+                iconEl.className = 'fas ' + icons[type];
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                
+                if (details && Object.keys(details).length > 0) {
+                    let detailHTML = '';
+                    for (const [key, value] of Object.entries(details)) {
+                        detailHTML += `<div class="detail-row"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+                    }
+                    modalDetails.innerHTML = detailHTML;
+                    modalDetails.style.display = 'block';
+                } else {
+                    modalDetails.style.display = 'none';
+                }
+                
+                modalActions.innerHTML = `<button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đã hiểu</button>`;
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-confirm-btn').onclick = function() {
+                    closeModal();
+                    if (callback) callback();
+                };
+            };
+
+            window.showConfirm = function(title, message, type, onConfirm, details = null) {
+                modalIcon.className = 'modal-icon ' + type;
+                const iconEl = modalIcon.querySelector('i');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+                iconEl.className = 'fas ' + icons[type];
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                
+                if (details && Object.keys(details).length > 0) {
+                    let detailHTML = '';
+                    for (const [key, value] of Object.entries(details)) {
+                        detailHTML += `<div class="detail-row"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+                    }
+                    modalDetails.innerHTML = detailHTML;
+                    modalDetails.style.display = 'block';
+                } else {
+                    modalDetails.style.display = 'none';
+                }
+                
+                modalActions.innerHTML = `
+                    <button class="modal-btn modal-btn-secondary" id="modal-cancel-btn"><i class="fas fa-times"></i> Hủy bỏ</button>
+                    <button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đồng ý</button>
+                `;
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-cancel-btn').onclick = closeModal;
+                document.getElementById('modal-confirm-btn').onclick = function() { closeModal(); onConfirm(); };
+            };
+
+            window.showLateConfirmModal = function(appt, onConfirm, onNoshow, onCancel) {
+                modalIcon.className = 'modal-icon warning';
+                const iconEl = modalIcon.querySelector('i');
+                iconEl.className = 'fas fa-exclamation-triangle';
+                modalTitle.textContent = 'Xác nhận lịch hẹn muộn';
+                modalMessage.textContent = `Lịch hẹn ${appt.id} của bệnh nhân ${appt.patientName} đã qua giờ khám (${appt.time}). Bạn muốn xử lý thế nào?`;
+                
+                modalDetails.innerHTML = `
+                    <div class="detail-row"><span class="label">Bệnh nhân</span><span class="value">${appt.patientName}</span></div>
+                    <div class="detail-row"><span class="label">Giờ hẹn</span><span class="value">${appt.time} - ${formatDateDisplay(appt.date)}</span></div>
+                    <div class="detail-row"><span class="label">Bác sĩ</span><span class="value">${appt.doctor}</span></div>
+                `;
+                modalDetails.style.display = 'block';
+                
+                modalActions.innerHTML = `
+                    <button class="modal-btn modal-btn-secondary" id="modal-cancel-btn"><i class="fas fa-times"></i> Đóng</button>
+                    <button class="modal-btn modal-btn-secondary" id="modal-noshow-btn" style="background: var(--accent-orange); color: #fff; border-color: var(--accent-orange);"><i class="fas fa-user-slash"></i> Đánh dấu No-show</button>
+                    <button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Vẫn xác nhận</button>
+                `;
+                
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-cancel-btn').onclick = function() { closeModal(); if(onCancel) onCancel(); };
+                document.getElementById('modal-noshow-btn').onclick = function() { closeModal(); if(onNoshow) onNoshow(); };
+                document.getElementById('modal-confirm-btn').onclick = function() { closeModal(); if(onConfirm) onConfirm(); };
+            };
+
+            function closeModal() { modalOverlay.classList.remove('active'); }
+            modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
+
+            // ============================================================
+            // LẤY DỮ LIỆU TỪ LT_Store
+            // ============================================================
+            let appointments = LT_Store.getAppointments();
+
+            function reloadAppointments() {
+                appointments = LT_Store.getAppointments();
+            }
+
+            const statusLabels = {
+                pending: 'Chờ xác nhận',
+                confirmed: 'Đã xác nhận',
+                checked: 'Đã check-in',
+                cancelled: 'Đã hủy',
+                noshow: 'Không đến'
+            };
+
+            const caLabels = {
+                sang: 'Ca sáng',
+                chieu: 'Ca chiều',
+                toi: 'Ca tối'
+            };
+
+            const TIME_SLOTS = {
+                sang: [
+                    { value: '07:30-08:30', label: '07:30 - 08:30' },
+                    { value: '08:30-09:30', label: '08:30 - 09:30' },
+                    { value: '09:30-10:30', label: '09:30 - 10:30' },
+                    { value: '10:30-11:30', label: '10:30 - 11:30' }
+                ],
+                chieu: [
+                    { value: '13:30-14:30', label: '13:30 - 14:30' },
+                    { value: '14:30-15:30', label: '14:30 - 15:30' },
+                    { value: '15:30-16:30', label: '15:30 - 16:30' },
+                    { value: '16:30-17:30', label: '16:30 - 17:30' },
+                    { value: '17:30-18:30', label: '17:30 - 18:30' }
+                ],
+                toi: [
+                    { value: '18:30-19:30', label: '18:30 - 19:30 (+10%)' },
+                    { value: '19:30-20:30', label: '19:30 - 20:30 (+10%)' },
+                    { value: '20:30-21:30', label: '20:30 - 21:30 (+10%)' },
+                    { value: '21:30-22:30', label: '21:30 - 22:30 (+10%)' }
+                ]
+            };
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            let currentTab = 'all';
+            let currentQuickDate = 'today';
+            let currentFilterData = { ca: '', doctorId: '', keyword: '', dateRange: { from: todayStr, to: todayStr } };
+            let selectedIds = new Set();
+            let lockedGroupKey = null;
+            let editingApptId = null;
+            let justUpdatedId = null;
+
+            function getGroupKey(appt) {
+                return `${appt.date}|${appt.ca}|${appt.doctorId}|${appt.status}`;
+            }
+
+            function getTimeStatus(appt) {
+                const apptDateTime = new Date(`${appt.date}T${appt.time.split('-')[0]}:00`);
+                const nowTime = new Date();
+                const diffMs = apptDateTime - nowTime;
+                const diffMins = diffMs / (1000 * 60);
+
+                if (diffMins < -15 && (appt.status === 'pending' || appt.status === 'confirmed')) {
+                    return 'overdue';
+                }
+                if (diffMins >= 0 && diffMins <= 60 && appt.status !== 'cancelled') {
+                    return 'upcoming';
+                }
+                return 'normal';
+            }
+
+            window.quickDate = function(type) {
+                document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector(`.quick-date-btn[data-quick="${type}"]`).classList.add('active');
+                currentQuickDate = type;
+
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+
+                if (type === 'today') {
+                    currentFilterData.dateRange = { from: todayStr, to: todayStr };
+                } else if (type === 'tomorrow') {
+                    const tmr = new Date(now);
+                    tmr.setDate(tmr.getDate() + 1);
+                    const tmrStr = tmr.toISOString().split('T')[0];
+                    currentFilterData.dateRange = { from: tmrStr, to: tmrStr };
+                } else if (type === 'week') {
+                    const endOfWeek = new Date(now);
+                    endOfWeek.setDate(endOfWeek.getDate() + 7);
+                    currentFilterData.dateRange = { from: todayStr, to: endOfWeek.toISOString().split('T')[0] };
+                } else {
+                    currentFilterData.dateRange = null;
+                }
+                clearSelection();
+                renderAppointments();
+            };
+
+            const STATUS_PRIORITY = { 'pending': 1, 'confirmed': 2, 'checked': 3, 'noshow': 4, 'cancelled': 5 };
+
+            function sortAppointments(list) {
+                return [...list].sort((a, b) => {
+                    const priorityA = STATUS_PRIORITY[a.status] || 99;
+                    const priorityB = STATUS_PRIORITY[b.status] || 99;
+                    if (priorityA !== priorityB) return priorityA - priorityB;
+                    if (a.date !== b.date) return a.date.localeCompare(b.date);
+                    return a.time.localeCompare(b.time);
+                });
+            }
+
+            function renderAppointments() {
+                const list = document.getElementById('appointments-list');
+                let filtered = [...appointments];
+
+                if (currentTab !== 'all') filtered = filtered.filter(a => a.status === currentTab);
+                if (currentFilterData.ca) filtered = filtered.filter(a => a.ca === currentFilterData.ca);
+                if (currentFilterData.doctorId) filtered = filtered.filter(a => a.doctorId === currentFilterData.doctorId);
+                if (currentFilterData.keyword) {
+                    const kw = currentFilterData.keyword.toLowerCase();
+                    filtered = filtered.filter(a => 
+                        a.id.toLowerCase().includes(kw) || 
+                        a.patientName.toLowerCase().includes(kw) ||
+                        a.phone.includes(kw)
+                    );
+                }
+                if (currentFilterData.dateRange) {
+                    filtered = filtered.filter(a => a.date >= currentFilterData.dateRange.from && a.date <= currentFilterData.dateRange.to);
+                }
+
+                filtered = sortAppointments(filtered);
+                updateStats(filtered);
+
+                if (filtered.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <h3>Không có lịch hẹn nào</h3>
+                            <p>Thử thay đổi bộ lọc hoặc chọn ngày khác để xem kết quả.</p>
+                            <button class="btn btn-primary" onclick="resetFilter()">
+                                <i class="fas fa-redo"></i> Đặt lại bộ lọc
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const groups = {};
+                filtered.forEach(appt => {
+                    const key = getGroupKey(appt);
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(appt);
+                });
+
+                let html = '';
+                Object.keys(groups).forEach(key => {
+                    const groupAppts = groups[key];
+                    const first = groupAppts[0];
+                    const isGroupSelected = groupAppts.every(a => selectedIds.has(a.id));
+                    const isGroupLocked = lockedGroupKey && lockedGroupKey !== key;
+
+                    html += `
+                        <div class="group-header">
+                            <div class="group-header-left">
+                                <div class="group-icon"><i class="fas fa-layer-group"></i></div>
+                                <div class="group-info">
+                                    <h4>${caLabels[first.ca]} - ${first.doctor}</h4>
+                                    <p>${formatDateDisplay(first.date)} - ${statusLabels[first.status]} - ${groupAppts.length} lịch hẹn</p>
+                                </div>
+                            </div>
+                            <label class="group-select-all">
+                                <input type="checkbox" ${isGroupSelected ? 'checked' : ''} 
+                                       ${isGroupLocked ? 'disabled' : ''}
+                                       onchange="toggleGroup('${key}', this.checked)">
+                                <span>Chọn cả nhóm</span>
+                            </label>
+                        </div>
+                    `;
+
+                    groupAppts.forEach(appt => {
+                        html += renderAppointmentCard(appt, isGroupLocked);
+                    });
+                });
+
+                list.innerHTML = html;
+            }
+
+            function renderAppointmentCard(appt, isGroupLocked) {
+                const isSelected = selectedIds.has(appt.id);
+                const timeStatus = getTimeStatus(appt);
+                const isOverdue = timeStatus === 'overdue';
+                const isUpcoming = timeStatus === 'upcoming';
+                const isPast = new Date(`${appt.date}T${appt.time.split('-')[0]}:00`) < new Date() && appt.status !== 'checked' && appt.status !== 'cancelled' && appt.status !== 'noshow';
+                const isJustUpdated = justUpdatedId === appt.id;
+
+                let actionsHTML = '';
+                
+                if (appt.status === 'pending') {
+                    if (isOverdue) {
+                        actionsHTML = `
+                            <span class="status-badge" style="background: var(--accent-orange-light); color: var(--accent-orange);"><i class="fas fa-exclamation-triangle"></i> Quá giờ xác nhận</span>
+                            <button class="btn btn-warning btn-sm" onclick="confirmAppointment('${appt.id}')">
+                                <i class="fas fa-check"></i> Xác nhận muộn
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="markNoShow('${appt.id}')">
+                                <i class="fas fa-user-slash"></i> Báo No-show
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="changeTime('${appt.id}')">
+                                <i class="fas fa-clock"></i> Đổi giờ
+                            </button>
+                        `;
+                    } else {
+                        actionsHTML = `
+                            <span class="status-badge pending">${statusLabels.pending}</span>
+                            <button class="btn btn-success btn-sm" onclick="confirmAppointment('${appt.id}')">
+                                <i class="fas fa-check"></i> Xác nhận
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="changeTime('${appt.id}')">
+                                <i class="fas fa-clock"></i> Đổi giờ
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="cancelAppointment('${appt.id}')">
+                                <i class="fas fa-times"></i> Hủy
+                            </button>
+                        `;
+                    }
+                } else if (appt.status === 'confirmed') {
+                    if (isOverdue) {
+                        actionsHTML = `
+                            <span class="status-badge" style="background: var(--accent-red-light); color: var(--accent-red);"><i class="fas fa-exclamation-circle"></i> Bệnh nhân lỡ giờ</span>
+                            <button class="btn btn-primary btn-sm" onclick="checkIn('${appt.id}')">
+                                <i class="fas fa-sign-in-alt"></i> Check-in muộn
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="markNoShow('${appt.id}')">
+                                <i class="fas fa-user-slash"></i> Báo No-show
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="changeTime('${appt.id}')">
+                                <i class="fas fa-clock"></i> Đổi giờ
+                            </button>
+                        `;
+                    } else {
+                        actionsHTML = `
+                            <span class="status-badge confirmed">${statusLabels.confirmed}</span>
+                            <button class="btn btn-primary btn-sm" onclick="checkIn('${appt.id}')">
+                                <i class="fas fa-sign-in-alt"></i> Check-in
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="changeTime('${appt.id}')">
+                                <i class="fas fa-clock"></i> Đổi giờ
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="cancelAppointment('${appt.id}')">
+                                <i class="fas fa-times"></i> Hủy
+                            </button>
+                        `;
+                    }
+                } else if (appt.status === 'checked') {
+                    actionsHTML = `
+                        <span class="status-badge checked">${statusLabels.checked}</span>
+                        <a href="chi_tiet_kham.html?id=${appt.id}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> Xem chi tiết
+                        </a>
+                    `;
+                } else if (appt.status === 'cancelled') {
+                    actionsHTML = `
+                        <span class="status-badge cancelled">${statusLabels.cancelled}</span>
+                        <button class="btn btn-outline btn-sm" onclick="changeTime('${appt.id}')">
+                            <i class="fas fa-clock"></i> Đổi giờ
+                        </button>
+                    `;
+                } else if (appt.status === 'noshow') {
+                    actionsHTML = `
+                        <span class="status-badge noshow">${statusLabels.noshow}</span>
+                        <button class="btn btn-outline btn-sm" onclick="changeTime('${appt.id}')">
+                            <i class="fas fa-clock"></i> Đổi giờ
+                        </button>
+                    `;
+                }
+
+                let timeBadge = '';
+                if (isUpcoming) timeBadge = '<div class="badge-urgent">Sắp đến</div>';
+                else if (isOverdue) timeBadge = '<div class="badge-overdue">Quá giờ</div>';
+
+                const checkboxDisabled = isGroupLocked ? 'disabled' : '';
+
+                return `
+                    <div class="appointment-card ${isGroupLocked ? 'locked' : ''} ${isJustUpdated ? 'just-updated' : ''}" data-status="${appt.status}">
+                        <input type="checkbox" class="appt-checkbox" ${isSelected ? 'checked' : ''} 
+                               ${checkboxDisabled}
+                               onchange="toggleSelect('${appt.id}', this.checked)">
+                        <div class="appt-time-box ${isPast ? 'past' : ''}">
+                            ${timeBadge}
+                            <div class="time">${appt.time.split('-')[0]}</div>
+                            <div class="ca">${caLabels[appt.ca]}</div>
+                        </div>
+                        <div class="appt-info">
+                            <h4>
+                                ${appt.patientName}
+                                <span class="appt-code">Mã: ${appt.id}</span>
+                            </h4>
+                            <div class="meta">
+                                <span><i class="fas fa-user-md"></i> ${appt.doctor}</span>
+                                <span><i class="fas fa-phone"></i> ${appt.phone}</span>
+                                <span><i class="fas fa-calendar"></i> ${formatDateDisplay(appt.date)}</span>
+                            </div>
+                            <div class="note"><i class="fas fa-notes-medical"></i> ${appt.symptom}</div>
+                        </div>
+                        <div class="appt-actions">
+                            ${actionsHTML}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function updateStats(filtered = null) {
+                const data = filtered || appointments;
+                const pending = data.filter(a => a.status === 'pending').length;
+                const confirmed = data.filter(a => a.status === 'confirmed').length;
+                const checked = data.filter(a => a.status === 'checked').length;
+                const noshow = data.filter(a => a.status === 'noshow').length;
+
+                document.getElementById('stat-pending').textContent = pending;
+                document.getElementById('stat-confirmed').textContent = confirmed;
+                document.getElementById('stat-checked').textContent = checked;
+                document.getElementById('stat-noshow').textContent = noshow;
+
+                document.getElementById('count-all').textContent = data.length;
+                document.getElementById('count-pending').textContent = pending;
+                document.getElementById('count-confirmed').textContent = confirmed;
+                document.getElementById('count-checked').textContent = checked;
+                document.getElementById('count-noshow').textContent = noshow;
+            }
+
+            function formatDateDisplay(dateStr) {
+                const d = new Date(dateStr);
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (d.toDateString() === new Date().toDateString()) return 'Hôm nay';
+                if (d.toDateString() === tomorrow.toDateString()) return 'Ngày mai';
+                if (d.toDateString() === yesterday.toDateString()) return 'Hôm qua';
+                
+                return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            }
+
+            window.switchTab = function(filter) {
+                currentTab = filter;
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                document.querySelector(`.filter-tab[data-filter="${filter}"]`).classList.add('active');
+                clearSelection();
+                renderAppointments();
+            };
+
+            window.applyFilter = function() {
+                currentFilterData.ca = document.getElementById('filter-ca').value;
+                currentFilterData.doctorId = document.getElementById('filter-doctor').value;
+                currentFilterData.keyword = document.getElementById('filter-keyword').value.trim();
+                renderAppointments();
+            };
+
+            window.resetFilter = function() {
+                document.getElementById('filter-ca').value = '';
+                document.getElementById('filter-doctor').value = '';
+                document.getElementById('filter-keyword').value = '';
+                currentFilterData.ca = '';
+                currentFilterData.doctorId = '';
+                currentFilterData.keyword = '';
+                quickDate('today');
+            };
+
+            window.toggleSelect = function(id, checked) {
+                const appt = appointments.find(a => a.id === id);
+                if (!appt) return;
+
+                const groupKey = getGroupKey(appt);
+
+                if (checked) {
+                    if (lockedGroupKey && lockedGroupKey !== groupKey) {
+                        showAlert('Chỉ chọn cùng nhóm', 'Bạn chỉ có thể chọn nhiều lịch hẹn cùng nhóm (cùng ca + cùng bác sĩ + cùng trạng thái).', 'warning');
+                        event.target.checked = false;
+                        return;
+                    }
+                    lockedGroupKey = groupKey;
+                    selectedIds.add(id);
+                } else {
+                    selectedIds.delete(id);
+                    if (selectedIds.size === 0) lockedGroupKey = null;
+                }
+                updateBulkBar();
+                renderAppointments();
+            };
+
+            window.toggleGroup = function(groupKey, checked) {
+                if (checked) {
+                    if (lockedGroupKey && lockedGroupKey !== groupKey) {
+                        showAlert('Chỉ chọn cùng nhóm', 'Bạn chỉ có thể chọn nhiều lịch hẹn cùng nhóm.', 'warning');
+                        return;
+                    }
+                    lockedGroupKey = groupKey;
+                    appointments.forEach(appt => {
+                        if (getGroupKey(appt) === groupKey) selectedIds.add(appt.id);
+                    });
+                } else {
+                    appointments.forEach(appt => {
+                        if (getGroupKey(appt) === groupKey) selectedIds.delete(appt.id);
+                    });
+                    if (selectedIds.size === 0) lockedGroupKey = null;
+                }
+                updateBulkBar();
+                renderAppointments();
+            };
+
+            function updateBulkBar() {
+                const bar = document.getElementById('bulk-bar');
+                const count = document.getElementById('bulk-count');
+                const groupInfo = document.getElementById('bulk-group-info');
+                const btnConfirm = document.getElementById('bulk-btn-confirm');
+                const btnCancel = document.getElementById('bulk-btn-cancel');
+
+                if (selectedIds.size > 0) {
+                    bar.classList.add('active');
+                    count.textContent = selectedIds.size;
+
+                    const firstAppt = appointments.find(a => a.id === Array.from(selectedIds)[0]);
+                    if (firstAppt) {
+                        groupInfo.textContent = `Nhóm: ${caLabels[firstAppt.ca]} - ${firstAppt.doctor} - ${statusLabels[firstAppt.status]}`;
+                    }
+
+                    const status = firstAppt.status;
+                    btnConfirm.style.display = (status === 'pending') ? 'inline-flex' : 'none';
+                    btnCancel.style.display = (status === 'pending' || status === 'confirmed') ? 'inline-flex' : 'none';
+                } else {
+                    bar.classList.remove('active');
+                }
+            }
+
+            window.clearSelection = function() {
+                selectedIds.clear();
+                lockedGroupKey = null;
+                document.querySelectorAll('.appt-checkbox').forEach(cb => cb.checked = false);
+                updateBulkBar();
+                renderAppointments();
+            };
+
+            window.bulkConfirm = function() {
+                const ids = Array.from(selectedIds);
+                if (ids.length === 0) return;
+
+                showConfirm('Xác nhận hàng loạt', `Bạn có chắc muốn xác nhận ${ids.length} lịch hẹn đã chọn?`, 'info', function() {
+                    ids.forEach(id => {
+                        LT_Store.updateAppointmentStatus(id, 'confirmed', 'Xác nhận hàng loạt');
+                    });
+                    reloadAppointments();
+                    clearSelection();
+                    renderAppointments();
+                    showAlert('Thành công', `Đã xác nhận ${ids.length} lịch hẹn.`, 'success');
+                });
+            };
+
+            window.bulkCancel = function() {
+                const ids = Array.from(selectedIds);
+                if (ids.length === 0) return;
+
+                showConfirm('Hủy hàng loạt', `Bạn có chắc muốn hủy ${ids.length} lịch hẹn đã chọn?`, 'warning', function() {
+                    ids.forEach(id => {
+                        LT_Store.updateAppointmentStatus(id, 'cancelled', 'Hủy hàng loạt');
+                    });
+                    reloadAppointments();
+                    clearSelection();
+                    renderAppointments();
+                    showAlert('Thành công', `Đã hủy ${ids.length} lịch hẹn.`, 'success');
+                });
+            };
+
+            window.confirmAppointment = function(id) {
+                const appt = appointments.find(a => a.id === id);
+                if (!appt) return;
+
+                const timeStatus = getTimeStatus(appt);
+
+                if (timeStatus === 'overdue') {
+                    showLateConfirmModal(
+                        appt,
+                        function() {
+                            LT_Store.updateAppointmentStatus(id, 'confirmed', 'Xác nhận muộn');
+                            reloadAppointments();
+                            renderAppointments();
+                            showAlert('Đã xác nhận muộn', `Lịch hẹn ${id} đã được xác nhận dù quá giờ.`, 'warning');
+                        },
+                        function() {
+                            LT_Store.updateAppointmentStatus(id, 'noshow', 'Bệnh nhân không đến');
+                            reloadAppointments();
+                            renderAppointments();
+                            showAlert('Đã đánh dấu No-show', `Bệnh nhân ${appt.patientName} không đến.`, 'info');
+                        }
+                    );
+                    return;
+                }
+
+                showConfirm('Xác nhận lịch hẹn', `Xác nhận lịch hẹn ${id} cho ${appt.patientName}?`, 'info', function() {
+                    LT_Store.updateAppointmentStatus(id, 'confirmed', 'Xác nhận bình thường');
+                    reloadAppointments();
+                    renderAppointments();
+                    showAlert('Xác nhận thành công', `Lịch hẹn ${id} đã được xác nhận.`, 'success');
+                });
+            };
+
+            window.cancelAppointment = function(id) {
+                const appt = appointments.find(a => a.id === id);
+                if (!appt) return;
+
+                showConfirm('Xác nhận hủy', `Bạn có chắc muốn hủy lịch hẹn ${id}?`, 'warning', function() {
+                    LT_Store.updateAppointmentStatus(id, 'cancelled', 'Lễ tân hủy');
+                    reloadAppointments();
+                    renderAppointments();
+                    showAlert('Hủy lịch thành công', `Lịch hẹn ${id} đã được hủy.`, 'success');
+                });
+            };
+
+            window.markNoShow = function(id) {
+                const appt = appointments.find(a => a.id === id);
+                if (!appt) return;
+
+                showConfirm('Đánh dấu No-show', `Đánh dấu ${appt.patientName} là KHÔNG ĐẾN?`, 'warning', function() {
+                    LT_Store.updateAppointmentStatus(id, 'noshow', 'Bệnh nhân không đến');
+                    reloadAppointments();
+                    renderAppointments();
+                    showAlert('Đã ghi nhận No-show', `Bệnh nhân ${appt.patientName} không đến.`, 'info');
+                });
+            };
+
+            window.checkIn = function(id) {
+                const appt = appointments.find(a => a.id === id);
+                if (!appt) return;
+
+                const timeStatus = getTimeStatus(appt);
+
+                if (timeStatus === 'overdue') {
+                    showConfirm('Check-in muộn', `Bệnh nhân ${appt.patientName} đã lỡ giờ hẹn. Vẫn check-in?`, 'warning', function() {
+                        window.location.href = `check_in.html?id=${id}&late=1`;
+                    });
+                } else {
+                    window.location.href = `check_in.html?id=${id}`;
+                }
+            };
+
+            window.changeTime = function(id) {
+                const appt = appointments.find(a => a.id === id);
+                if (!appt) return;
+
+                editingApptId = id;
+
+                document.getElementById('current-appt-info').innerHTML = `
+                    <div class="row"><span class="label">Mã lịch hẹn:</span><span class="value">${appt.id}</span></div>
+                    <div class="row"><span class="label">Bệnh nhân:</span><span class="value">${appt.patientName}</span></div>
+                    <div class="row"><span class="label">Bác sĩ:</span><span class="value">${appt.doctor}</span></div>
+                    <div class="row"><span class="label">Ngày khám:</span><span class="value">${formatDateDisplay(appt.date)}</span></div>
+                    <div class="row"><span class="label">Giờ hiện tại:</span><span class="value" style="color: var(--accent-orange);">${appt.time} (${caLabels[appt.ca]})</span></div>
+                `;
+
+                renderTimeSlots(appt);
+                document.getElementById('time-picker-overlay').classList.add('active');
+            };
+
+            function renderTimeSlots(appt) {
+                const container = document.getElementById('time-picker-content');
+                let html = '';
+                
+                ['sang', 'chieu', 'toi'].forEach(ca => {
+                    const caIcon = ca === 'sang' ? 'fa-sun' : (ca === 'chieu' ? 'fa-cloud-sun' : 'fa-moon');
+                    const caLabel = caLabels[ca];
+                    const caRange = ca === 'sang' ? '07:30 - 11:30' : (ca === 'chieu' ? '13:30 - 18:30' : '18:30 - 22:30');
+                    
+                    html += `
+                        <div class="time-picker-section">
+                            <h4><i class="fas ${caIcon}"></i> ${caLabel} (${caRange})</h4>
+                            <div class="time-slots-grid">
+                    `;
+                    
+                    TIME_SLOTS[ca].forEach(slot => {
+                        const booked = !LT_Store.isSlotAvailable(appt.doctorId, appt.date, slot.value, appt.id);
+                        const isCurrent = slot.value === appt.time;
+                        
+                        let labelClass = '';
+                        let noteHTML = '';
+                        
+                        if (booked) {
+                            labelClass = 'disabled';
+                            noteHTML = '<span class="slot-note">Đã đặt</span>';
+                        } else if (isCurrent) {
+                            labelClass = 'current-slot';
+                            noteHTML = '<span class="slot-note" style="color: var(--accent-orange);">Hiện tại</span>';
+                        }
+                        
+                        html += `
+                            <div class="time-slot">
+                                <input type="radio" 
+                                       id="slot-${slot.value}" 
+                                       name="new_time_slot" 
+                                       value="${slot.value}"
+                                       data-ca="${ca}"
+                                       ${booked ? 'disabled' : ''}
+                                       ${isCurrent ? 'checked' : ''}>
+                                <label for="slot-${slot.value}" class="${labelClass}">
+                                    ${slot.label}
+                                    ${noteHTML}
+                                </label>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div></div>`;
+                });
+                
+                container.innerHTML = html;
+            }
+
+            window.closeTimePicker = function() {
+                document.getElementById('time-picker-overlay').classList.remove('active');
+                editingApptId = null;
+            };
+
+            window.submitChangeTime = function() {
+                const appt = appointments.find(a => a.id === editingApptId);
+                if (!appt) return;
+
+                const selectedSlot = document.querySelector('input[name="new_time_slot"]:checked');
+                if (!selectedSlot) {
+                    showAlert('Thiếu thông tin', 'Vui lòng chọn khung giờ mới!', 'warning');
+                    return;
+                }
+
+                const newTime = selectedSlot.value;
+                const newCa = selectedSlot.dataset.ca;
+
+                if (newTime === appt.time) {
+                    showAlert('Không thay đổi', 'Khung giờ mới trùng với khung giờ hiện tại.', 'info');
+                    return;
+                }
+
+                const oldTime = appt.time;
+                const oldCa = appt.ca;
+
+                LT_Store.changeAppointmentTime(editingApptId, newTime, newCa);
+                reloadAppointments();
+
+                closeTimePicker();
+                justUpdatedId = appt.id;
+                setTimeout(() => { justUpdatedId = null; }, 1500);
+                renderAppointments();
+
+                const caChanged = oldCa !== newCa;
+                const message = caChanged 
+                    ? `Đã chuyển lịch hẹn ${appt.id} từ ${caLabels[oldCa]} (${oldTime}) sang ${caLabels[newCa]} (${newTime}).`
+                    : `Đã đổi giờ lịch hẹn ${appt.id} từ ${oldTime} sang ${newTime}.`;
+                
+                showAlert('Đổi giờ thành công', message + ' Bệnh nhân sẽ nhận được SMS.', 'success', null, {
+                    'Mã LH': appt.id,
+                    'Bệnh nhân': appt.patientName,
+                    'Giờ cũ': `${oldTime} (${caLabels[oldCa]})`,
+                    'Giờ mới': `${newTime} (${caLabels[newCa]})`
+                });
+            };
+
+            document.getElementById('time-picker-overlay').addEventListener('click', function(e) {
+                if (e.target === this) closeTimePicker();
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('time-picker-overlay').classList.contains('active')) {
+                    closeTimePicker();
+                }
+            });
+
+            window.exportExcel = function() {
+                showAlert('Xuất Excel', 'Đang xuất danh sách lịch hẹn ra file Excel... (Demo)', 'info');
+            };
+
+            // INIT
+            const urlParams = new URLSearchParams(window.location.search);
+            const caFilter = urlParams.get('ca');
+            if (caFilter) {
+                document.getElementById('filter-ca').value = caFilter;
+                currentFilterData.ca = caFilter;
+            }
+
+            reloadAppointments();
+            renderAppointments();
+
+            // Multi-tab sync
+            window.addEventListener('storage', function(e) {
+                if (e.key && e.key.startsWith('medbooking_')) {
+                    reloadAppointments();
+                    renderAppointments();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

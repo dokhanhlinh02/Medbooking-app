@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Trang chủ Quản trị MEDBOOKING</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/A.css">
+
+    <style>
+        /* Định dạng phông chữ thương hiệu MedBooking */
+        .brand-name {
+            font-family: 'Quicksand', sans-serif !important;
+            font-weight: 700 !important;
+            text-transform: none !important;
+            letter-spacing: -0.01em;
+            font-size: 22px;
+        }
+
+        /* Hiệu ứng hover sáng lên giống nút thông báo */
+        .admin-profile-btn {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 8px 16px;
+            background: var(--primary-light);
+            border-radius: 50px;
+            transition: all 0.25s ease;
+        }
+        .admin-profile-btn:hover {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .home-banner {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F5F3FF 100%);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--border-radius);
+            padding: 28px 32px;
+            display: flex; align-items: center; gap: 24px;
+            box-shadow: var(--shadow-soft);
+            position: relative; overflow: hidden;
+            margin-bottom: 22px;
+        }
+        [data-theme="dark"] .home-banner {
+            background: linear-gradient(135deg, #1A1130 0%, #221640 100%);
+        }
+        .home-banner h2 {
+            font-size: 24px; font-weight: 800;
+            color: var(--secondary-color); margin-bottom: 8px;
+        }
+        .home-banner p { font-size: 14px; color: var(--text-gray); max-width: 520px; }
+        .home-banner p strong { color: var(--primary-color); }
+        .home-banner .btn-go {
+            margin-top: 16px;
+            padding: 11px 24px;
+            background: var(--primary-color); color: #fff;
+            border: none; border-radius: 50px;
+            font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.3);
+        }
+        .home-banner .btn-go:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(139, 92, 246, 0.4);
+        }
+        .home-banner-illustration {
+            flex-shrink: 0; width: 180px; height: 150px;
+            position: relative;
+        }
+        .book-stack { position: absolute; bottom: 0; right: 0; width: 170px; height: 130px; }
+        .book-stack .book {
+            position: absolute; border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2);
+        }
+        .book-stack .book-1 {
+            bottom: 0; left: 0; width: 150px; height: 55px;
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+            transform: skewY(-4deg);
+        }
+        .book-stack .book-2 {
+            bottom: 42px; left: 10px; width: 135px; height: 50px;
+            background: linear-gradient(135deg, #F0ABFC, #E879F9);
+            transform: skewY(-4deg);
+        }
+        .book-stack .book-3 {
+            bottom: 84px; left: 20px; width: 120px; height: 46px;
+            background: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+            border: 1px solid #E5E7EB;
+            transform: skewY(-4deg);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary-color); font-size: 22px;
+        }
+        .home-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+        .home-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--border-radius);
+            padding: 22px;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative; overflow: hidden;
+        }
+        .home-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+        .home-card .hc-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--primary-gradient); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; margin-bottom: 14px;
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3);
+        }
+        .home-card h3 {
+            font-size: 14px; font-weight: 700;
+            color: var(--secondary-color); margin-bottom: 6px;
+        }
+        .home-card .hc-value {
+            font-family: 'Plus Jakarta Sans'; font-size: 26px;
+            font-weight: 800; color: var(--primary-color);
+            letter-spacing: -0.02em; line-height: 1;
+            margin-bottom: 6px;
+        }
+        .home-card .hc-desc {
+            font-size: 12px; color: var(--text-gray);
+        }
+        .home-recent {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--border-radius);
+            padding: 22px 24px;
+            box-shadow: var(--shadow-soft);
+        }
+        .home-recent h3 {
+            font-size: 14px; font-weight: 700;
+            color: var(--secondary-color); margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .home-recent h3 a {
+            font-size: 12px; font-weight: 600;
+            color: var(--primary-color);
+        }
+        .home-recent table { border: none; box-shadow: none; background: transparent; }
+        .home-recent thead { background: transparent; }
+        .home-recent th { background: transparent; border-bottom: 1px solid var(--border-glass); }
+        .home-recent td { border-bottom: 1px solid var(--border-glass); }
+        @media (max-width: 900px) {
+            .home-banner { flex-direction: column; text-align: center; padding: 22px; }
+            .home-banner-illustration { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <button class="sidebar-close" id="sidebar-close" aria-label="Đóng menu"><i class="fas fa-times"></i></button>
+        <div class="brand">
+            <span class="brand-name">MedBooking</span>
+            <span class="brand-sub">ADMIN PANEL</span>
+        </div>
+        <nav>
+            <h3>QUẢN LÝ NHÂN SỰ & NGƯỜI DÙNG</h3>
+            <ul>
+                <li><a href="/admin/home_a.html"><strong>Trang chủ Admin</strong></a></li>
+                <li><a href="/admin/quan_ly_tai_khoan.html">Quản lý tài khoản</a></li>
+                <li><a href="/admin/quan_ly_bac_si.html">Quản lý bác sĩ</a></li>
+            </ul>
+            <h3>DANH MỤC Y TẾ</h3>
+            <ul>
+                <li><a href="/admin/quan_ly_chuyen_khoa.html">Quản lý chuyên khoa</a></li>
+                <li><a href="/admin/quan_ly_dich_vu.html">Quản lý dịch vụ & giá</a></li>
+                <li><a href="/admin/quan_ly_mapping.html">Quản lý Mapping Triệu chứng</a></li>
+            </ul>
+            <h3>BÁO CÁO & THỐNG KÊ</h3>
+            <ul>
+                <li><a href="/admin/dashboard.html">Dashboard Thống kê & Báo cáo</a></li>
+                <li><a href="/admin/nhat_ky_giao_dich.html">Nhật ký Giao dịch Chi tiết</a></li>
+                <li><a href="/admin/thung_rac.html">Thùng rác hệ thống</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main>
+        <header>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Mở menu"><i class="fas fa-bars"></i></button>
+            <h1>Trang chủ Quản trị MedBooking</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <!-- ID để tự động cập nhật tên động của tài khoản đăng nhập -->
+                <a href="ho_so_ca_nhan.html" class="admin-profile-btn" id="admin-name-btn">AD Tên Admin</a>
+                <button class="theme-toggle" id="theme-toggle">🌙</button>
+                <a href="../dk_dn/dn.html">Đăng xuất</a>
+            </div>
+        </header>
+
+        <section>
+            <div class="home-banner">
+                <div style="flex:1;">
+                    <h2 id="home-greeting">Welcome back, Admin!</h2>
+                    <p>
+                        Hôm nay hệ thống có <strong>3</strong> thông báo mới. Bạn đang có
+                        <strong id="stat-accounts-banner">0</strong> tài khoản,
+                        <strong id="stat-doctors-banner">0</strong> bác sĩ và
+                        <strong id="stat-services-banner">0</strong> dịch vụ đang hoạt động.
+                    </p>
+                    <button class="btn-go" onclick="location.href='dashboard.html'">
+                        <i class="fas fa-chart-line"></i> Xem Dashboard
+                    </button>
+                </div>
+                <div class="home-banner-illustration">
+                    <div class="book-stack">
+                        <div class="book book-1"></div>
+                        <div class="book book-2"></div>
+                        <div class="book book-3"><i class="fas fa-clipboard-list"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home-cards">
+                <div class="home-card" onclick="location.href='quan_ly_tai_khoan.html'">
+                    <div class="hc-icon"><i class="fas fa-users"></i></div>
+                    <h3>QUẢN LÝ TÀI KHOẢN</h3>
+                    <div class="hc-value" id="cnt-accounts">0</div>
+                    <div class="hc-desc"><span id="active-accounts">0</span> tài khoản đang hoạt động</div>
+                </div>
+                <div class="home-card" onclick="location.href='quan_ly_bac_si.html'">
+                    <div class="hc-icon"><i class="fas fa-user-md"></i></div>
+                    <h3>ĐỘI NGŨ BÁC SĨ</h3>
+                    <div class="hc-value" id="cnt-doctors">0</div>
+                    <div class="hc-desc"><span id="available-doctors">0</span> bác sĩ đang trực</div>
+                </div>
+                <div class="home-card" onclick="location.href='quan_ly_dich_vu.html'">
+                    <div class="hc-icon"><i class="fas fa-file-medical-alt"></i></div>
+                    <h3>DỊCH VỤ Y TẾ</h3>
+                    <div class="hc-value" id="cnt-services">0</div>
+                    <div class="hc-desc">Bảng giá niêm yết đang áp dụng</div>
+                </div>
+            </div>
+
+            <div class="home-recent">
+                <h3>Giao dịch gần đây <a href="nhat_ky_giao_dich.html">Xem tất cả →</a></h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã GD</th><th>Bệnh nhân</th><th>Bác sĩ</th>
+                            <th>Ngày khám</th><th>Doanh thu</th><th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="home-transactions">
+                        <tr><td colspan="6" style="text-align:center;padding:30px;color:#9CA3AF;">Đang tải...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <script src="/static/js/admin-data.js"></script>
+    <script src="/static/js/admin.js"></script>
+    <script>
+    (function () {
+        const html = document.documentElement;
+        const saved = localStorage.getItem('mb-admin-theme') ||
+                      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        html.setAttribute('data-theme', saved);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+                themeBtn.addEventListener('click', () => {
+                    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                    html.setAttribute('data-theme', next);
+                    localStorage.setItem('mb-admin-theme', next);
+                    themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+                });
+            }
+            const menuBtn = document.getElementById('menu-toggle');
+            const closeBtn = document.getElementById('sidebar-close');
+            const sidebar = document.querySelector('aside');
+            const overlay = document.getElementById('sidebar-overlay');
+            function openSidebar() { sidebar.classList.add('open'); if (overlay) overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+            function closeSidebar() { sidebar.classList.remove('open'); if (overlay) overlay.classList.remove('active'); document.body.style.overflow = ''; }
+            if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+            sidebar.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', () => { if (window.innerWidth <= 900) closeSidebar(); });
+            });
+            window.addEventListener('resize', () => { if (window.innerWidth > 900) closeSidebar(); });
+
+            // Tự động cập nhật tên Admin động lên Header
+            if (window.MedBookingAPI && typeof window.MedBookingAPI.getCurrentUser === 'function') {
+                window.MedBookingAPI.getCurrentUser().then(res => {
+                    const data = res.data;
+                    const adminName = data.ho_ten || data.name || '';
+                    const adminNameBtn = document.getElementById('admin-name-btn');
+                    if (adminNameBtn && adminName) {
+                        adminNameBtn.textContent = `AD ${adminName}`;
+                    }
+                }).catch(err => {
+                    console.error("Không thể tải thông tin admin trên header:", err);
+                });
+            }
+
+            const greetEl = document.getElementById('home-greeting');
+            if (greetEl) {
+                const h = new Date().getHours();
+                let g = 'Chào buổi tối';
+                if (h < 12) g = 'Chào buổi sáng';
+                else if (h < 18) g = 'Chào buổi chiều';
+                greetEl.textContent = `${g}, Admin!`;
+            }
+
+            function loadHomeData() {
+                if (!window.MedBookingAPI || !window.MedBookingUtils) {
+                    setTimeout(loadHomeData, 100);
+                    return;
+                }
+                const API = window.MedBookingAPI;
+                Promise.all([API.getAccounts(), API.getDoctors(), API.getServices()]).then(([a,d,s]) => {
+                    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+                    set('stat-accounts-banner', a.data.length);
+                    set('stat-doctors-banner', d.data.length);
+                    set('stat-services-banner', s.data.length);
+                    set('cnt-accounts', a.data.length);
+                    set('cnt-doctors', d.data.length);
+                    set('cnt-services', s.data.length);
+                    set('active-accounts', a.data.filter(x => x.status === 'active').length);
+                    set('available-doctors', d.data.filter(x => x.status === 'available').length);
+                });
+
+                const tbody = document.getElementById('home-transactions');
+                API.getTransactions({ year: '2026' }).then(res => {
+                    const list = res.data.slice(0, 5);
+                    if (!list.length) {
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#9CA3AF;">Chưa có giao dịch.</td></tr>`;
+                        return;
+                    }
+                    tbody.innerHTML = list.map(t => `
+                        <tr>
+                            <td><strong>${t.id}</strong></td>
+                            <td>${t.patient}</td>
+                            <td>${t.doctorConfirm || '—'}</td>
+                            <td>${t.date.split('-').reverse().join('/')}</td>
+                            <td style="color:#10B981;font-weight:700;">${window.MedBookingUtils.formatMoney(t.revenue)}</td>
+                            <td><span class="badge ${t.status === 'completed' ? 'success' : 'danger'}">${t.status === 'completed' ? 'Hoàn thành' : 'Đã hủy'}</span></td>
+                        </tr>
+                    `).join('');
+                });
+            }
+            loadHomeData();
+        });
+    })();
+    </script>
+</body>
+</html>

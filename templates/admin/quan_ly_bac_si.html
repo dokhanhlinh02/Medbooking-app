@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quản lý Bác sĩ</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/A.css">
+    
+    <style>
+        /* Định dạng phông chữ thương hiệu MedBooking */
+        .brand-name {
+            font-family: 'Quicksand', sans-serif !important;
+            font-weight: 700 !important;
+            text-transform: none !important;
+            letter-spacing: -0.01em;
+            font-size: 22px;
+        }
+
+        /* Hiệu ứng hover sáng lên giống nút thông báo */
+        .admin-profile-btn {
+            text-decoration: none; 
+            color: var(--primary-color); 
+            font-weight: 600; 
+            padding: 8px 16px; 
+            background: var(--primary-light); 
+            border-radius: 50px;
+            transition: all 0.25s ease;
+        }
+        .admin-profile-btn:hover {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <button class="sidebar-close" id="sidebar-close" aria-label="Đóng menu"><i class="fas fa-times"></i></button>
+        <div class="brand">
+            <span class="brand-name">MedBooking</span>
+            <span class="brand-sub">ADMIN PANEL</span>
+        </div>
+        <nav>
+            <h3>QUẢN LÝ NHÂN SỰ & NGƯỜI DÙNG</h3>
+            <ul>
+                <li><a href="/admin/home_a.html">Trang chủ Admin</a></li>
+                <li><a href="/admin/quan_ly_tai_khoan.html">Quản lý tài khoản</a></li>
+                <li><a href="/admin/quan_ly_bac_si.html"><strong>Quản lý bác sĩ</strong></a></li>
+            </ul>
+            <h3>DANH MỤC Y TẾ</h3>
+            <ul>
+                <li><a href="/admin/quan_ly_chuyen_khoa.html">Quản lý chuyên khoa</a></li>
+                <li><a href="/admin/quan_ly_dich_vu.html">Quản lý dịch vụ & giá</a></li>
+                <li><a href="/admin/quan_ly_mapping.html">Quản lý Mapping Triệu chứng</a></li>
+            </ul>
+            <h3>BÁO CÁO & THỐNG KÊ</h3>
+            <ul>
+                <li><a href="/admin/dashboard.html">Dashboard Thống kê & Báo cáo</a></li>
+                <li><a href="/admin/nhat_ky_giao_dich.html">Nhật ký Giao dịch Chi tiết</a></li>
+                <li><a href="/admin/thung_rac.html">Thùng rác hệ thống</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main>
+        <header>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Mở menu"><i class="fas fa-bars"></i></button>
+            <h1>Quản lý Thông tin Bác sĩ</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <!-- Đã thêm id="admin-name-btn" để tự động cập nhật tên động của tài khoản đăng nhập -->
+                <a href="ho_so_ca_nhan.html" class="admin-profile-btn" id="admin-name-btn">AD Tên Admin</a>
+                <button class="theme-toggle" id="theme-toggle">🌙</button>
+                <a href="../dk_dn/dn.html">Đăng xuất</a>
+            </div>
+        </header>
+
+        <section>
+            <div>
+                <input type="text" id="search-doctor" placeholder="Tìm kiếm theo tên bác sĩ, email...">
+                <select id="filter-specialty">
+                    <option value="all">Tất cả chuyên khoa</option>
+                </select>
+            </div>
+            <button type="button" id="btn-add-doctor">+ Thêm Bác sĩ Mới</button>
+        </section>
+
+        <section>
+            <h2>Danh sách Bác sĩ trong hệ thống</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã BS</th>
+                        <th>Họ và tên</th>
+                        <th>Chuyên khoa</th>
+                        <th>Email / Số điện thoại</th>
+                        <th>Trạng thái</th>
+                        <th>Đánh giá</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="doctor-table-body">
+                    <tr><td colspan="7" style="text-align:center;padding:40px;color:#8B7FA8;">Đang tải...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="doctor-form-modal" style="display: none;">
+            <h3 id="form-title">Thêm Bác sĩ Mới</h3>
+            <form id="form-doctor-info">
+                <div>
+                    <label for="doc-name">Họ và tên:</label>
+                    <input type="text" id="doc-name" required>
+                </div>
+                <div>
+                    <label for="doc-specialty">Chuyên khoa:</label>
+                    <select id="doc-specialty" required></select>
+                </div>
+                <div>
+                    <label for="doc-email">Email đăng nhập:</label>
+                    <input type="email" id="doc-email" required>
+                </div>
+                <div>
+                    <label for="doc-phone">Số điện thoại:</label>
+                    <input type="text" id="doc-phone" required>
+                </div>
+                <div>
+                    <button type="submit" id="btn-save-doctor">Lưu thông tin</button>
+                    <button type="button" id="btn-cancel-doctor">Hủy bỏ</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <script src="../../static/js/admin-data.js"></script>
+    <script src="../../static/js/admin.js"></script>
+    <script>
+    (function () {
+        const html = document.documentElement;
+        const saved = localStorage.getItem('mb-admin-theme') ||
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        html.setAttribute('data-theme', saved);
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+                themeBtn.addEventListener('click', () => {
+                    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                    html.setAttribute('data-theme', next);
+                    localStorage.setItem('mb-admin-theme', next);
+                    themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+                });
+            }
+            const menuBtn = document.getElementById('menu-toggle');
+            const closeBtn = document.getElementById('sidebar-close');
+            const sidebar = document.querySelector('aside');
+            const overlay = document.getElementById('sidebar-overlay');
+            function openSidebar() { sidebar.classList.add('open'); if (overlay) overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+            function closeSidebar() { sidebar.classList.remove('open'); if (overlay) overlay.classList.remove('active'); document.body.style.overflow = ''; }
+            if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+            sidebar.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', () => { if (window.innerWidth <= 900) closeSidebar(); });
+            });
+            window.addEventListener('resize', () => { if (window.innerWidth > 900) closeSidebar(); });
+
+            // Tự động cập nhật tên Admin động lên Header
+            if (window.MedBookingAPI && typeof window.MedBookingAPI.getCurrentUser === 'function') {
+                window.MedBookingAPI.getCurrentUser().then(res => {
+                    const data = res.data;
+                    const adminName = data.ho_ten || data.name || '';
+                    const adminNameBtn = document.getElementById('admin-name-btn');
+                    if (adminNameBtn && adminName) {
+                        adminNameBtn.textContent = `AD ${adminName}`;
+                    }
+                }).catch(err => {
+                    console.error("Không thể tải thông tin admin trên header:", err);
+                });
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

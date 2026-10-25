@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBOOKING - Thu Viện Phí</title>
+    <!-- Favicon chuẩn hình trái tim xanh dương -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/LT_BS.css">
+    
+    <style>
+        main { max-width: 1100px; margin: 30px auto 80px; padding: 0 20px; }
+
+        .cashier-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+        .cashier-stat {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+            border: 2px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .cashier-stat:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-blue);
+        }
+        .cashier-stat.active {
+            border-color: var(--primary-blue);
+            background: var(--primary-blue-light);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.2);
+        }
+        .cashier-stat::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--primary-blue);
+        }
+        .cashier-stat.green::before { background: var(--accent-green); }
+        .cashier-stat.orange::before { background: var(--accent-orange); }
+        .cashier-stat.green.active { border-color: var(--accent-green); background: var(--accent-green-light); }
+        .cashier-stat.orange.active { border-color: var(--accent-orange); background: var(--accent-orange-light); }
+
+        .cashier-stat-icon {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-blue), #6FB1F5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .cashier-stat.green .cashier-stat-icon { background: linear-gradient(135deg, var(--accent-green), #58D68D); }
+        .cashier-stat.orange .cashier-stat-icon { background: linear-gradient(135deg, var(--accent-orange), #F8C471); }
+
+        .cashier-stat-info h4 {
+            font-size: 22px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--secondary-color);
+        }
+        .cashier-stat-info p {
+            font-size: 12px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+        .cashier-stat .click-hint {
+            position: absolute;
+            bottom: 6px; right: 10px;
+            font-size: 10px;
+            color: var(--text-gray);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .cashier-stat:hover .click-hint { opacity: 0.7; }
+
+        .search-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            margin-bottom: 25px;
+        }
+        .search-row { display: flex; gap: 12px; }
+        .search-row input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            background: var(--input-bg);
+            color: var(--secondary-color);
+            outline: none;
+            transition: all 0.3s;
+        }
+        .search-row input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+        }
+
+        .invoice-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 35px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            animation: fadeIn 0.4s ease-out;
+            position: relative;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .invoice-header {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 2px dashed var(--border-color);
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .invoice-header h2 {
+            font-size: 26px;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
+        .invoice-header p { color: var(--text-gray); font-size: 14px; }
+
+        .invoice-status-badge {
+            position: absolute;
+            top: 0; right: 0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .invoice-status-badge.pending {
+            background: var(--status-pending-bg);
+            color: var(--status-pending-text);
+        }
+        .invoice-status-badge.paid {
+            background: var(--status-completed-bg);
+            color: var(--status-completed-text);
+        }
+
+        .invoice-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .info-block {
+            background: var(--bg-body);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 3px solid var(--primary-blue);
+        }
+        .info-block .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-gray);
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .info-block .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+        .invoice-table thead th {
+            text-align: left;
+            padding: 14px 16px;
+            background: var(--primary-blue-light);
+            color: var(--primary-blue);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        .invoice-table thead th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+        .invoice-table thead th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: right; }
+        .invoice-table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-glass);
+            font-size: 14px;
+        }
+        .invoice-table tbody td:last-child {
+            text-align: right;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .invoice-total {
+            background: linear-gradient(135deg, var(--primary-blue), #6FB1F5);
+            color: #fff;
+            padding: 20px 25px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .invoice-total .label { font-size: 15px; font-weight: 500; opacity: 0.95; }
+        .invoice-total .amount { font-size: 26px; font-weight: 700; font-family: 'Poppins', sans-serif; }
+
+        .payment-info {
+            background: linear-gradient(135deg, var(--accent-green-light), #D4EDDA);
+            border-left: 4px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .payment-info-icon {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-green), #58D68D);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 28px;
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+        .payment-info-text { flex: 1; }
+        .payment-info-text h4 {
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: #155724;
+            margin-bottom: 5px;
+        }
+        .payment-info-text p {
+            font-size: 13px;
+            color: #155724;
+            opacity: 0.85;
+            margin: 0;
+        }
+        [data-theme="dark"] .payment-info { background: linear-gradient(135deg, #1A3A22, #1F4A2A); }
+        [data-theme="dark"] .payment-info-text h4,
+        [data-theme="dark"] .payment-info-text p { color: #7FDB8F; }
+
+        .invoice-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .recent-transactions {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            margin-top: 25px;
+        }
+        .recent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .recent-transactions h3 {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-blue);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            margin: 0;
+        }
+        .recent-transactions h3 i {
+            background: var(--primary-blue-light);
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .filter-badge {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--primary-blue-light);
+            color: var(--primary-blue);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .filter-badge.active { display: inline-flex; }
+        .filter-badge button {
+            background: transparent;
+            border: none;
+            color: var(--primary-blue);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: var(--bg-body);
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+        .transaction-item:hover {
+            background: var(--primary-blue-light);
+            transform: translateX(5px);
+            border-left-color: var(--primary-blue);
+        }
+        .transaction-item:last-child { margin-bottom: 0; }
+        .transaction-item.new-transaction {
+            animation: highlightNew 2s ease-out;
+        }
+        @keyframes highlightNew {
+            0% { background: var(--accent-green-light); transform: scale(1.02); }
+            50% { background: var(--accent-green-light); transform: scale(1); }
+            100% { background: var(--bg-body); transform: scale(1); }
+        }
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+        .transaction-icon {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-green), #58D68D);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .transaction-text { min-width: 0; flex: 1; }
+        .transaction-text h5 {
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .transaction-text p {
+            font-size: 11px;
+            color: var(--text-gray);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .transaction-amount {
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            color: var(--accent-green);
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+        .transaction-actions {
+            display: flex;
+            gap: 6px;
+            margin-left: 12px;
+        }
+        .transaction-actions .btn { padding: 5px 10px; font-size: 11px; border-radius: 8px; }
+
+        .empty-transactions {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-gray);
+        }
+        .empty-transactions i {
+            font-size: 40px;
+            color: var(--primary-blue-light);
+            margin-bottom: 12px;
+        }
+        .empty-transactions p { font-size: 13px; }
+
+        .modal-box.transaction-detail {
+            max-width: 700px !important;
+            text-align: left !important;
+            padding: 30px !important;
+        }
+
+        /* Nút đăng xuất đồng bộ với giao diện lễ tân */
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EF4444;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover {
+            background: #EF4444;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .search-row { flex-direction: column; }
+            .invoice-card { padding: 22px; }
+            .invoice-actions { flex-direction: column; }
+            .invoice-actions .btn { width: 100%; justify-content: center; }
+            .payment-info { flex-direction: column; text-align: center; }
+            .cashier-stats { grid-template-columns: 1fr; }
+            .transaction-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .transaction-amount { margin-left: 0; }
+            .transaction-actions { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Cổng Lễ Tân</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/le_tan/dashboard.html">Tổng quan</a></li>
+                    <li><a href="/le_tan/quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                    <li><a href="/le_tan/danh_sach_lich_hen.html">Danh sách ca trực</a></li>
+                    <li><a href="/le_tan/check_in.html">Check-in</a></li>
+                    <li><a href="/le_tan/vien_phi.html"><strong>Viện phí</strong></a></li>
+                </ul>
+            </nav>
+            <div class="user-badge" onclick="window.location.href='ho_so_ca_nhan.html'">
+                <div class="user-avatar" id="topbar-avatar">LT</div>
+                <div class="user-info-text">
+                    <div class="user-name" id="topbar-receptionist-name">Lễ tân</div>
+                    <div class="user-role">Lễ tân</div>
+                </div>
+            </div>
+            <!-- Nút chuyển đổi sáng/tối -->
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi giao diện">
+                <i class="fas fa-moon"></i>
+            </button>
+            <!-- Nút Đăng xuất nằm ngay bên cạnh -->
+            <button class="logout-btn" onclick="window.location.href='../dk_dn/dn.html'" title="Đăng xuất">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Thu viện phí</span>
+        </div>
+
+        <div class="page-title">
+            <div class="page-title-left">
+                <h2><i class="fas fa-money-bill-wave"></i> Quản lý Viện phí & Thanh toán</h2>
+                <p>Chỉ thu tiền khi bệnh nhân đã check-in thành công</p>
+            </div>
+        </div>
+
+        <div class="info-banner">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                <strong>📋 Quy định thu viện phí</strong>
+                Chỉ thu tiền khi bệnh nhân đã <strong>check-in</strong>. Bệnh nhân chưa check-in, đã hủy, hoặc không đến <strong>KHÔNG</strong> phát sinh chi phí.
+            </div>
+        </div>
+
+        <div class="cashier-stats">
+            <div class="cashier-stat green active" data-filter="cash" onclick="filterTransactions('cash')">
+                <div class="cashier-stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="cashier-stat-info">
+                    <h4 id="stat-cash-today">0 VNĐ</h4>
+                    <p>Tiền mặt đã thu hôm nay</p>
+                </div>
+                <span class="click-hint">Nhấn để xem</span>
+            </div>
+            <div class="cashier-stat" data-filter="invoices" onclick="filterTransactions('invoices')">
+                <div class="cashier-stat-icon"><i class="fas fa-file-invoice"></i></div>
+                <div class="cashier-stat-info">
+                    <h4 id="stat-invoices-today">0</h4>
+                    <p>Hóa đơn đã thu</p>
+                </div>
+                <span class="click-hint">Nhấn để xem</span>
+            </div>
+            <div class="cashier-stat orange" data-filter="pending" onclick="filterTransactions('pending')">
+                <div class="cashier-stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="cashier-stat-info">
+                    <h4 id="stat-pending-invoices">0</h4>
+                    <p>Chờ thu tiền</p>
+                </div>
+                <span class="click-hint">Nhấn để xem</span>
+            </div>
+        </div>
+
+        <div class="search-card">
+            <form class="search-row" onsubmit="event.preventDefault(); searchInvoice();">
+                <input type="text" id="search-input" placeholder="Nhập mã lịch hẹn (VD: LH102) để tra cứu hóa đơn...">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Tra cứu
+                </button>
+            </form>
+        </div>
+
+        <div class="invoice-card" id="invoice-card" style="display: none;">
+            <div class="invoice-header">
+                <span class="invoice-status-badge pending" id="inv-status">Chờ thanh toán</span>
+                <h2><i class="fas fa-file-invoice-dollar"></i> HÓA ĐƠN VIỆN PHÍ</h2>
+                <p>Mã hóa đơn: <strong id="invoice-id">-</strong> • Ngày: <strong id="invoice-date">-</strong></p>
+            </div>
+
+            <div class="invoice-info">
+                <div class="info-block">
+                    <div class="label">Bệnh nhân</div>
+                    <div class="value" id="inv-patient">-</div>
+                </div>
+                <div class="info-block">
+                    <div class="label">Bác sĩ khám</div>
+                    <div class="value" id="inv-doctor">-</div>
+                </div>
+                <div class="info-block">
+                    <div class="label">Ca khám</div>
+                    <div class="value" id="inv-ca">-</div>
+                </div>
+                <div class="info-block">
+                    <div class="label">Chuyên khoa</div>
+                    <div class="value" id="inv-specialty">-</div>
+                </div>
+            </div>
+
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Khoản mục</th>
+                        <th>Số lượng</th>
+                        <th>Đơn giá</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-items"></tbody>
+            </table>
+
+            <div class="invoice-total">
+                <span class="label"><i class="fas fa-money-bill-wave"></i> TỔNG CỘNG</span>
+                <span class="amount" id="inv-total">0 VNĐ</span>
+            </div>
+
+            <div class="payment-info" id="payment-info-box">
+                <div class="payment-info-icon">
+                    <i class="fas fa-money-bill-alt"></i>
+                </div>
+                <div class="payment-info-text">
+                    <h4>💵 Thanh toán bằng TIỀN MẶT</h4>
+                    <p>Quý khách vui lòng thanh toán trực tiếp tại quầy lễ tân. Sau khi xác nhận, hóa đơn sẽ được ghi nhận vào hệ thống.</p>
+                </div>
+            </div>
+
+            <div class="invoice-actions" id="invoice-actions">
+                <button class="btn btn-outline" onclick="printInvoice()">
+                    <i class="fas fa-print"></i> In hóa đơn
+                </button>
+                <button class="btn btn-success btn-lg" onclick="confirmPayment()" id="btn-confirm-payment">
+                    <i class="fas fa-check-circle"></i> Xác nhận đã thu tiền mặt
+                </button>
+            </div>
+        </div>
+
+        <div class="recent-transactions">
+            <div class="recent-header">
+                <h3><i class="fas fa-history"></i> <span id="recent-title">Giao dịch gần đây (Hôm nay)</span></h3>
+                <div class="filter-badge" id="filter-badge">
+                    <i class="fas fa-filter"></i>
+                    <span id="filter-badge-text">Đang lọc</span>
+                    <button onclick="filterTransactions('clear')"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div id="recent-transactions-list"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Cổng Lễ Tân</p>
+                </div>
+            </div>
+            <p>Hệ thống quản lý y tế MedBooking - Giải pháp toàn diện cho bệnh viện và phòng khám[cite: 7].</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="dashboard.html">Tổng quan</a></li>
+                <li><a href="quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                <li><a href="check_in.html">Check-in</a></li>
+                <li><a href="vien_phi.html">Viện phí</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án[cite: 7].</p>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon"><i class="fas fa-info"></i></div>
+            <h3 id="modal-title">Thông báo</h3>
+            <div class="modal-details" id="modal-details" style="display: none;"></div>
+            <p id="modal-message">Nội dung thông báo</p>
+            <div class="modal-actions" id="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="modal-confirm-btn">
+                    <i class="fas fa-check"></i> Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="transaction-detail-overlay">
+        <div class="modal-box transaction-detail">
+            <div id="transaction-detail-content"></div>
+        </div>
+    </div>
+
+    <script src="../../static/js/client.js"></script>
+    <script src="../../static/js/LT_Store.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ============================================================
+            // ĐỒNG BỘ THÔNG TIN TÀI KHOẢN TỪ LOCALSTORAGE
+            // ============================================================
+            let currentCashierId = 'LT8801';
+            let currentCashierName = 'Nguyễn Thị Lễ Tân';
+
+            try {
+                const loggedInUser = localStorage.getItem('medbooking_logged_in_user');
+                const currentUser = localStorage.getItem('medbooking_current_user');
+                const currentEmail = localStorage.getItem('medbooking_email');
+
+                if (loggedInUser) {
+                    const userData = JSON.parse(loggedInUser);
+                    currentCashierName = userData.name || userData.fullname || userData.ho_ten || currentCashierName;
+                    currentCashierId = userData.id || userData.userId || currentCashierId;
+                } else if (currentUser) {
+                    const userData = JSON.parse(currentUser);
+                    currentCashierName = userData.name || userData.fullname || userData.ho_ten || currentCashierName;
+                    currentCashierId = userData.id || userData.userId || currentCashierId;
+                } else if (currentEmail) {
+                    const users = JSON.parse(localStorage.getItem('medbooking_users')) || [];
+                    const found = users.find(u => u.email === currentEmail);
+                    if (found) {
+                        currentCashierName = found.fullname || found.name || currentCashierName;
+                        currentCashierId = found.id || currentCashierId;
+                    }
+                }
+
+                // Cập nhật tên lên Topbar
+                const topbarNameEl = document.getElementById('topbar-receptionist-name');
+                if (topbarNameEl) topbarNameEl.textContent = currentCashierName;
+
+                // Tạo Avatar viết tắt chuẩn từ tên
+                const cleanName = currentCashierName.trim();
+                const parts = cleanName.split(/\s+/);
+                let initials = 'LT';
+                if (parts.length >= 2) {
+                    initials = (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+                } else if (parts.length === 1 && parts[0].length > 0) {
+                    initials = parts[0].slice(0, 2).toUpperCase();
+                }
+
+                const topbarAvatar = document.getElementById('topbar-avatar');
+                if (topbarAvatar) topbarAvatar.textContent = initials;
+
+            } catch (e) {
+                console.error("Không thể tải thông tin lễ tân từ localStorage:", e);
+            }
+
+            // ============================================================
+            // THEME
+            // ============================================================
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+
+            // ============================================================
+            // MODAL SYSTEM
+            // ============================================================
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalDetails = document.getElementById('modal-details');
+            const modalActions = document.getElementById('modal-actions');
+
+            window.showAlert = function(title, message, type = 'info', callback = null, details = null) {
+                modalIcon.className = 'modal-icon ' + type;
+                const iconEl = modalIcon.querySelector('i');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+                iconEl.className = 'fas ' + icons[type];
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                
+                if (details && Object.keys(details).length > 0) {
+                    let detailHTML = '';
+                    for (const [key, value] of Object.entries(details)) {
+                        detailHTML += `<div class="detail-row"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+                    }
+                    modalDetails.innerHTML = detailHTML;
+                    modalDetails.style.display = 'block';
+                } else {
+                    modalDetails.style.display = 'none';
+                }
+                
+                modalActions.innerHTML = `<button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đã hiểu</button>`;
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-confirm-btn').onclick = function() {
+                    closeModal();
+                    if (callback) callback();
+                };
+            };
+
+            window.showConfirm = function(title, message, type, onConfirm, details = null) {
+                modalIcon.className = 'modal-icon ' + type;
+                const iconEl = modalIcon.querySelector('i');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+                iconEl.className = 'fas ' + icons[type];
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                
+                if (details && Object.keys(details).length > 0) {
+                    let detailHTML = '';
+                    for (const [key, value] of Object.entries(details)) {
+                        detailHTML += `<div class="detail-row"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+                    }
+                    modalDetails.innerHTML = detailHTML;
+                    modalDetails.style.display = 'block';
+                } else {
+                    modalDetails.style.display = 'none';
+                }
+                
+                modalActions.innerHTML = `
+                    <button class="modal-btn modal-btn-secondary" id="modal-cancel-btn"><i class="fas fa-times"></i> Hủy bỏ</button>
+                    <button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đồng ý</button>
+                `;
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-cancel-btn').onclick = closeModal;
+                document.getElementById('modal-confirm-btn').onclick = function() { 
+                    closeModal(); 
+                    if (typeof onConfirm === 'function') onConfirm(); 
+                };
+            };
+
+            function closeModal() { modalOverlay.classList.remove('active'); }
+            modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
+
+            // ============================================================
+            // STATE
+            // ============================================================
+            let invoicesDatabase = {};
+            let paidTransactions = [];
+            let currentInvoice = null;
+            let currentFilter = 'cash';
+            let lastAddedTransactionId = null;
+
+            // ============================================================
+            // HELPERS
+            // ============================================================
+            function formatCurrency(amount) {
+                if (typeof amount !== 'number' || isNaN(amount)) return '0 VNĐ';
+                return amount.toLocaleString('vi-VN') + ' VNĐ';
+            }
+
+            function formatTime(isoString) {
+                const d = new Date(isoString);
+                return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            }
+
+            function isToday(isoString) {
+                const d = new Date(isoString);
+                const today = new Date();
+                return d.toDateString() === today.toDateString();
+            }
+
+            function calculateTotal(items) {
+                if (!Array.isArray(items)) return 0;
+                return items.reduce((sum, item) => {
+                    const qty = parseInt(item.qty) || 0;
+                    const price = parseInt(item.price) || 0;
+                    return sum + (qty * price);
+                }, 0);
+            }
+
+            // ============================================================
+            // LOAD DATA TỪ STORE
+            // ============================================================
+            function loadInvoicesFromStore() {
+                const appts = LT_Store.getAppointments();
+                invoicesDatabase = {};
+                
+                appts.forEach(appt => {
+                    if (!appt.items || appt.items.length === 0) return;
+                    
+                    invoicesDatabase[appt.id] = {
+                        appointmentStatus: appt.status,
+                        patient: appt.patientName,
+                        patientId: appt.patientId,
+                        doctor: appt.doctor,
+                        doctorId: appt.doctorId,
+                        ca: appt.ca === 'sang' ? 'Ca sáng' : appt.ca === 'chieu' ? 'Ca chiều' : 'Ca tối',
+                        time: appt.time,
+                        date: appt.date,
+                        specialty: appt.specialty,
+                        items: appt.items,
+                        status: LT_Store.isAlreadyPaid(appt.id) ? 'paid' : 'pending'
+                    };
+                });
+            }
+
+            function loadPaymentsFromStore() {
+                paidTransactions = LT_Store.getPayments();
+            }
+
+            // ============================================================
+            // STATS
+            // ============================================================
+            function updateCashierStats() {
+                const todayTransactions = paidTransactions.filter(t => 
+                    isToday(t.paidAt) && t.cashierId === currentCashierId
+                );
+
+                const totalCash = todayTransactions.reduce((sum, t) => sum + (parseInt(t.totalAmount) || 0), 0);
+                const countInvoices = todayTransactions.length;
+                const pendingInvoices = Object.values(invoicesDatabase).filter(inv => 
+                    inv.status === 'pending' && inv.appointmentStatus === 'checked'
+                ).length;
+
+                document.getElementById('stat-cash-today').textContent = formatCurrency(totalCash);
+                document.getElementById('stat-invoices-today').textContent = countInvoices;
+                document.getElementById('stat-pending-invoices').textContent = pendingInvoices;
+            }
+
+            // ============================================================
+            // FILTER
+            // ============================================================
+            window.filterTransactions = function(filter) {
+                currentFilter = filter === 'clear' ? null : filter;
+
+                document.querySelectorAll('.cashier-stat').forEach(s => s.classList.remove('active'));
+                if (currentFilter) {
+                    const statEl = document.querySelector(`.cashier-stat[data-filter="${filter}"]`);
+                    if (statEl) statEl.classList.add('active');
+                }
+
+                const badge = document.getElementById('filter-badge');
+                const badgeText = document.getElementById('filter-badge-text');
+                const title = document.getElementById('recent-title');
+
+                if (currentFilter === 'cash') {
+                    badge.classList.add('active');
+                    badgeText.textContent = 'Đang lọc: Tiền mặt hôm nay';
+                    title.textContent = 'Giao dịch tiền mặt hôm nay';
+                } else if (currentFilter === 'invoices') {
+                    badge.classList.add('active');
+                    badgeText.textContent = 'Đang lọc: Hóa đơn đã thu';
+                    title.textContent = 'Tất cả hóa đơn đã thu';
+                } else if (currentFilter === 'pending') {
+                    badge.classList.add('active');
+                    badgeText.textContent = 'Đang lọc: Hóa đơn chờ thu';
+                    title.textContent = 'Hóa đơn chờ thu tiền';
+                } else {
+                    badge.classList.remove('active');
+                    title.textContent = 'Giao dịch gần đây (Hôm nay)';
+                }
+
+                renderRecentTransactions();
+            };
+
+            // ============================================================
+            // RENDER RECENT TRANSACTIONS
+            // ============================================================
+            function renderRecentTransactions() {
+                const list = document.getElementById('recent-transactions-list');
+                
+                if (currentFilter === 'pending') {
+                    const pending = Object.entries(invoicesDatabase)
+                        .filter(([_, inv]) => inv.status === 'pending' && inv.appointmentStatus === 'checked')
+                        .map(([id, inv]) => ({
+                            appointmentId: id,
+                            patientName: inv.patient,
+                            doctorName: inv.doctor,
+                            specialty: inv.specialty,
+                            ca: inv.ca,
+                            time: inv.time,
+                            totalAmount: calculateTotal(inv.items)
+                        }));
+
+                    if (pending.length === 0) {
+                        list.innerHTML = `
+                            <div class="empty-transactions">
+                                <i class="fas fa-check-circle" style="color: var(--accent-green);"></i>
+                                <p>Tất cả hóa đơn đã được thu!</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    list.innerHTML = pending.map(t => `
+                        <div class="transaction-item" onclick="quickOpenInvoice('${t.appointmentId}')" style="border-left-color: var(--accent-orange);">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: linear-gradient(135deg, var(--accent-orange), #F8C471);">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="transaction-text">
+                                    <h5>${t.patientName}</h5>
+                                    <p>${t.appointmentId} • ${t.ca} • ${t.time} • ${t.doctorName}</p>
+                                </div>
+                            </div>
+                            <div class="transaction-amount" style="color: var(--accent-orange);">${formatCurrency(t.totalAmount)}</div>
+                            <div class="transaction-actions">
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); quickOpenInvoice('${t.appointmentId}')">
+                                    <i class="fas fa-eye"></i> Xem HĐ
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                    return;
+                }
+
+                let filtered = paidTransactions.filter(t => t.cashierId === currentCashierId);
+                if (currentFilter === 'cash' || currentFilter === null) {
+                    filtered = filtered.filter(t => isToday(t.paidAt));
+                }
+                filtered.sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt));
+
+                if (filtered.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-transactions">
+                            <i class="fas fa-receipt"></i>
+                            <p>Chưa có giao dịch nào${currentFilter === 'cash' ? ' trong hôm nay' : ''}.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                list.innerHTML = filtered.map(t => {
+                    const isNew = t.id === lastAddedTransactionId;
+                    return `
+                        <div class="transaction-item ${isNew ? 'new-transaction' : ''}" onclick="viewTransactionDetail('${t.id}')">
+                            <div class="transaction-info">
+                                <div class="transaction-icon"><i class="fas fa-money-bill-wave"></i></div>
+                                <div class="transaction-text">
+                                    <h5>${t.patientName}</h5>
+                                    <p>${t.invoiceId} • ${formatTime(t.paidAt)} • Tiền mặt</p>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">+${formatCurrency(t.totalAmount)}</div>
+                            <div class="transaction-actions">
+                                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); viewTransactionDetail('${t.id}')">
+                                    <i class="fas fa-eye"></i> Chi tiết
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (lastAddedTransactionId) {
+                    setTimeout(() => { lastAddedTransactionId = null; }, 2000);
+                }
+            }
+
+            // ============================================================
+            // SEARCH INVOICE
+            // ============================================================
+            window.searchInvoice = function() {
+                const query = document.getElementById('search-input').value.trim().toUpperCase();
+                if (!query) {
+                    showAlert('Thiếu thông tin', 'Vui lòng nhập mã lịch hẹn!', 'warning');
+                    return;
+                }
+
+                loadInvoicesFromStore();
+                loadPaymentsFromStore();
+
+                const paid = paidTransactions.find(t => t.appointmentId === query);
+                if (paid) {
+                    showAlert('Hóa đơn đã được thu', `Hóa đơn ${query} đã được thu lúc ${formatTime(paid.paidAt)} bởi ${paid.cashierName}.`, 'warning', null, {
+                        'Mã HĐ': paid.invoiceId || paid.id,
+                        'Thu ngân': paid.cashierName,
+                        'Số tiền': formatCurrency(paid.totalAmount)
+                    });
+                    return;
+                }
+
+                const invoice = invoicesDatabase[query];
+                if (!invoice) {
+                    showAlert('Không tìm thấy', `Không tìm thấy hóa đơn với mã "${query}".`, 'error');
+                    return;
+                }
+
+                if (invoice.appointmentStatus !== 'checked') {
+                    const messages = {
+                        'pending': { title: '⚠️ Bệnh nhân chưa check-in', msg: `Bệnh nhân ${invoice.patient} chưa được check-in. Không thể thu viện phí.`, goCheckin: true },
+                        'confirmed': { title: '⚠️ Bệnh nhân chưa đến khám', msg: `Lịch hẹn đã xác nhận nhưng chưa đến check-in. Không thể thu viện phí.`, goCheckin: true },
+                        'cancelled': { title: '❌ Lịch hẹn đã bị hủy', msg: `Lịch hẹn đã bị hủy. Không phát sinh chi phí khám bệnh.`, goCheckin: false },
+                        'noshow': { title: '❌ Bệnh nhân không đến khám', msg: `Bệnh nhân đã không đến khám (No-show). Không phát sinh chi phí.`, goCheckin: false }
+                    };
+                    const m = messages[invoice.appointmentStatus];
+                    showAlert(
+                        m.title,
+                        m.msg,
+                        'error',
+                        m.goCheckin ? function() { window.location.href = `check_in.html?id=${query}`; } : null,
+                        { 'Mã LH': query, 'Bệnh nhân': invoice.patient, 'Trạng thái': invoice.appointmentStatus }
+                    );
+                    return;
+                }
+
+                currentInvoice = { id: query, ...invoice };
+                displayInvoice(currentInvoice);
+            };
+
+            window.quickOpenInvoice = function(id) {
+                document.getElementById('search-input').value = id;
+                searchInvoice();
+            };
+
+            // ============================================================
+            // DISPLAY INVOICE
+            // ============================================================
+            function displayInvoice(inv) {
+                const card = document.getElementById('invoice-card');
+                card.style.display = 'block';
+                card.style.animation = 'none';
+                setTimeout(() => { card.style.animation = 'fadeIn 0.4s ease-out'; }, 10);
+
+                document.getElementById('invoice-id').textContent = `HD-2026-${inv.id.replace('LH', '')}`;
+                document.getElementById('invoice-date').textContent = new Date().toLocaleDateString('vi-VN');
+                document.getElementById('inv-patient').textContent = inv.patient;
+                document.getElementById('inv-doctor').textContent = inv.doctor;
+                document.getElementById('inv-ca').textContent = `${inv.ca} • ${inv.time}`;
+                document.getElementById('inv-specialty').textContent = inv.specialty;
+
+                document.getElementById('inv-status').textContent = 'Chờ thanh toán';
+                document.getElementById('inv-status').className = 'invoice-status-badge pending';
+                document.getElementById('payment-info-box').style.display = 'flex';
+                document.getElementById('invoice-actions').innerHTML = `
+                    <button class="btn btn-outline" onclick="printInvoice()"><i class="fas fa-print"></i> In hóa đơn</button>
+                    <button class="btn btn-success btn-lg" onclick="confirmPayment()" id="btn-confirm-payment"><i class="fas fa-check-circle"></i> Xác nhận đã thu tiền mặt</button>
+                `;
+
+                let total = 0;
+                const itemsHTML = inv.items.map(item => {
+                    const qty = parseInt(item.qty) || 0;
+                    const price = parseInt(item.price) || 0;
+                    const subtotal = qty * price;
+                    total += subtotal;
+                    return `<tr><td>${item.name}</td><td>${qty}</td><td>${formatCurrency(price)}</td><td>${formatCurrency(subtotal)}</td></tr>`;
+                }).join('');
+
+                document.getElementById('invoice-items').innerHTML = itemsHTML;
+                document.getElementById('inv-total').textContent = formatCurrency(total);
+
+                setTimeout(() => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+
+            // ============================================================
+            // CONFIRM PAYMENT
+            // ============================================================
+            window.confirmPayment = function() {
+                if (!currentInvoice) {
+                    showAlert('Lỗi', 'Không có hóa đơn để thanh toán!', 'error');
+                    return;
+                }
+
+                if (currentInvoice.appointmentStatus !== 'checked') {
+                    showAlert('Lỗi nghiệp vụ', 'Không thể thu tiền cho lịch hẹn chưa check-in.', 'error');
+                    return;
+                }
+
+                if (typeof LT_Store.createPayment !== 'function') {
+                    showAlert('Lỗi hệ thống', 'Module LT_Store chưa được cập nhật (thiếu createPayment). Vui lòng tải lại trang bằng Ctrl+F5.', 'error');
+                    return;
+                }
+
+                if (LT_Store.isAlreadyPaid(currentInvoice.id)) {
+                    showAlert('Hóa đơn đã được thu', 'Hóa đơn này đã được thu rồi!', 'warning');
+                    return;
+                }
+
+                const total = calculateTotal(currentInvoice.items);
+                const totalAmount = formatCurrency(total);
+                const patientName = currentInvoice.patient;
+                const invoiceId = `HD-2026-${currentInvoice.id.replace('LH', '')}`;
+
+                showConfirm(
+                    'Xác nhận thu tiền mặt',
+                    `Bạn xác nhận đã nhận đủ ${totalAmount} từ bệnh nhân ${patientName}?`,
+                    'info',
+                    function() {
+                        try {
+                            const result = LT_Store.createPayment({
+                                invoiceId: invoiceId,
+                                appointmentId: currentInvoice.id,
+                                patientId: currentInvoice.patientId,
+                                patientName: patientName,
+                                doctorId: currentInvoice.doctorId,
+                                doctorName: currentInvoice.doctor,
+                                specialty: currentInvoice.specialty,
+                                ca: currentInvoice.ca,
+                                date: currentInvoice.date,
+                                items: currentInvoice.items,
+                                totalAmount: total,
+                                paymentMethod: 'cash',
+                                cashierId: currentCashierId,
+                                cashierName: currentCashierName
+                            });
+
+                            if (!result || !result.success) {
+                                showAlert('Không thể thu tiền', (result && result.message) || 'Đã xảy ra lỗi không xác định.', 'error');
+                                return;
+                            }
+
+                            loadInvoicesFromStore();
+                            loadPaymentsFromStore();
+                            lastAddedTransactionId = result.payment.id;
+
+                            document.getElementById('inv-status').textContent = 'Đã thanh toán';
+                            document.getElementById('inv-status').className = 'invoice-status-badge paid';
+
+                            document.getElementById('payment-info-box').style.display = 'none';
+
+                            document.getElementById('invoice-actions').innerHTML = `
+                                <button class="btn btn-outline" onclick="printInvoice()"><i class="fas fa-print"></i> In lại hóa đơn</button>
+                                <button class="btn btn-primary" onclick="resetInvoice()"><i class="fas fa-search"></i> Tra cứu khác</button>
+                            `;
+
+                            updateCashierStats();
+                            renderRecentTransactions();
+
+                            showAlert('Thu tiền thành công! 🎉', `Đã thu ${totalAmount} từ bệnh nhân ${patientName}.`, 'success', function() {
+                                document.getElementById('search-input').value = '';
+                                document.getElementById('invoice-card').style.display = 'none';
+                                currentInvoice = null;
+                            }, {
+                                'Mã hóa đơn': result.payment.invoiceId,
+                                'Bệnh nhân': result.payment.patientName,
+                                'Số tiền': totalAmount,
+                                'Phương thức': 'Tiền mặt',
+                                'Thu ngân': result.payment.cashierName
+                            });
+
+                        } catch (error) {
+                            console.error('Lỗi khi thu tiền:', error);
+                            showAlert('Lỗi hệ thống', 'Đã xảy ra lỗi khi xử lý thanh toán: ' + error.message, 'error');
+                        }
+                    }
+                );
+            };
+
+            window.resetInvoice = function() {
+                document.getElementById('invoice-card').style.display = 'none';
+                document.getElementById('search-input').value = '';
+                document.getElementById('search-input').focus();
+                currentInvoice = null;
+            };
+
+            window.viewTransactionDetail = function(paymentId) {
+                const t = paidTransactions.find(x => x.id === paymentId);
+                if (!t) {
+                    showAlert('Lỗi', 'Không tìm thấy giao dịch!', 'error');
+                    return;
+                }
+
+                const overlay = document.getElementById('transaction-detail-overlay');
+                const content = document.getElementById('transaction-detail-content');
+                const total = calculateTotal(t.items);
+
+                let itemsHTML = t.items.map(item => {
+                    const qty = parseInt(item.qty) || 0;
+                    const price = parseInt(item.price) || 0;
+                    return `<tr><td>${item.name}</td><td>${qty}</td><td>${formatCurrency(price)}</td><td style="text-align:right;font-weight:600;">${formatCurrency(qty*price)}</td></tr>`;
+                }).join('');
+
+                content.innerHTML = `
+                    <div class="invoice-header" style="text-align:center; padding-bottom:20px; border-bottom:2px dashed var(--border-color); margin-bottom:20px; position:relative;">
+                        <span class="invoice-status-badge paid">Đã thanh toán</span>
+                        <h2 style="font-size:22px; color:var(--primary-blue); margin-bottom:5px;"><i class="fas fa-file-invoice-dollar"></i> HÓA ĐƠN VIỆN PHÍ</h2>
+                        <p style="color:var(--text-gray); font-size:13px;">Mã: <strong>${t.invoiceId}</strong> • Ngày: <strong>${new Date(t.paidAt).toLocaleDateString('vi-VN')}</strong></p>
+                    </div>
+                    <div class="invoice-info" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; margin-bottom:20px;">
+                        <div class="info-block" style="background:var(--bg-body); padding:12px; border-radius:10px; border-left:3px solid var(--primary-blue);">
+                            <div class="label" style="font-size:10px; text-transform:uppercase; color:var(--text-gray); font-weight:600; margin-bottom:4px;">Bệnh nhân</div>
+                            <div class="value" style="font-size:14px; font-weight:600;">${t.patientName}</div>
+                        </div>
+                        <div class="info-block" style="background:var(--bg-body); padding:12px; border-radius:10px; border-left:3px solid var(--primary-blue);">
+                            <div class="label" style="font-size:10px; text-transform:uppercase; color:var(--text-gray); font-weight:600; margin-bottom:4px;">Bác sĩ</div>
+                            <div class="value" style="font-size:14px; font-weight:600;">${t.doctorName}</div>
+                        </div>
+                        <div class="info-block" style="background:var(--bg-body); padding:12px; border-radius:10px; border-left:3px solid var(--primary-blue);">
+                            <div class="label" style="font-size:10px; text-transform:uppercase; color:var(--text-gray); font-weight:600; margin-bottom:4px;">Chuyên khoa</div>
+                            <div class="value" style="font-size:14px; font-weight:600;">${t.specialty}</div>
+                        </div>
+                        <div class="info-block" style="background:var(--bg-body); padding:12px; border-radius:10px; border-left:3px solid var(--primary-blue);">
+                            <div class="label" style="font-size:10px; text-transform:uppercase; color:var(--text-gray); font-weight:600; margin-bottom:4px;">Ca khám</div>
+                            <div class="value" style="font-size:14px; font-weight:600;">${t.ca}</div>
+                        </div>
+                    </div>
+                    <table class="invoice-table" style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                        <thead><tr>
+                            <th style="text-align:left; padding:10px; background:var(--primary-blue-light); color:var(--primary-blue); font-size:11px; text-transform:uppercase;">Khoản mục</th>
+                            <th style="text-align:left; padding:10px; background:var(--primary-blue-light); color:var(--primary-blue); font-size:11px; text-transform:uppercase;">SL</th>
+                            <th style="text-align:left; padding:10px; background:var(--primary-blue-light); color:var(--primary-blue); font-size:11px; text-transform:uppercase;">Đơn giá</th>
+                            <th style="text-align:right; padding:10px; background:var(--primary-blue-light); color:var(--primary-blue); font-size:11px; text-transform:uppercase;">Thành tiền</th>
+                        </tr></thead>
+                        <tbody>${itemsHTML}</tbody>
+                    </table>
+                    <div class="invoice-total" style="background:linear-gradient(135deg, var(--primary-blue), #6FB1F5); color:#fff; padding:16px 20px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <span style="font-size:14px; font-weight:500;">TỔNG CỘNG</span>
+                        <span style="font-size:22px; font-weight:700; font-family:'Poppins';">${formatCurrency(total)}</span>
+                    </div>
+                    <div style="background:var(--accent-green-light); border-left:4px solid var(--accent-green); border-radius:10px; padding:14px 18px; margin-bottom:20px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <i class="fas fa-check-circle" style="font-size:22px; color:var(--accent-green);"></i>
+                            <div>
+                                <div style="font-size:13px; font-weight:700; color:#155724;">Đã thanh toán bằng tiền mặt</div>
+                                <div style="font-size:11px; color:#155724; opacity:0.8;">Thu ngân: ${t.cashierName} • Lúc: ${new Date(t.paidAt).toLocaleString('vi-VN')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-actions" style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button class="modal-btn modal-btn-secondary" onclick="closeTransactionDetail()"><i class="fas fa-times"></i> Đóng</button>
+                        <button class="modal-btn modal-btn-primary" onclick="reprintInvoice('${t.invoiceId}')"><i class="fas fa-print"></i> In lại</button>
+                    </div>
+                `;
+
+                overlay.classList.add('active');
+            };
+
+            window.closeTransactionDetail = function() {
+                document.getElementById('transaction-detail-overlay').classList.remove('active');
+            };
+
+            document.getElementById('transaction-detail-overlay').addEventListener('click', function(e) {
+                if (e.target === this) closeTransactionDetail();
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('transaction-detail-overlay').classList.contains('active')) {
+                    closeTransactionDetail();
+                }
+            });
+
+            window.reprintInvoice = function(invoiceId) {
+                closeTransactionDetail();
+                setTimeout(() => {
+                    showAlert('In hóa đơn', `Đang in lại hóa đơn ${invoiceId}...`, 'info');
+                }, 300);
+            };
+
+            window.printInvoice = function() {
+                showAlert('In hóa đơn', 'Đang kết nối máy in...', 'info');
+            };
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            loadInvoicesFromStore();
+            loadPaymentsFromStore();
+            updateCashierStats();
+            renderRecentTransactions();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const appointmentId = urlParams.get('appointment_id');
+            if (appointmentId) {
+                document.getElementById('search-input').value = appointmentId;
+                setTimeout(() => { searchInvoice(); }, 300);
+            }
+
+            window.addEventListener('storage', function(e) {
+                if (e.key && e.key.startsWith('medbooking_')) {
+                    loadInvoicesFromStore();
+                    loadPaymentsFromStore();
+                    updateCashierStats();
+                    renderRecentTransactions();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

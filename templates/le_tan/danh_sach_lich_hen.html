@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBOOKING - Danh sách Lịch hẹn theo Ca</title>
+    <!-- Favicon chuẩn hình trái tim xanh dương -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/LT_BS.css">
+    
+    <style>
+        main { max-width: 1400px; margin: 30px auto 80px; padding: 0 20px; }
+
+        .ca-sections { display: flex; flex-direction: column; gap: 30px; }
+
+        .ca-section {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            border-top: 4px solid;
+        }
+        .ca-section.sang { border-top-color: #F39C12; }
+        .ca-section.chieu { border-top-color: var(--primary-blue); }
+        .ca-section.toi { border-top-color: var(--accent-purple); }
+
+        .ca-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .ca-section-title { display: flex; align-items: center; gap: 15px; }
+        .ca-section-icon {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 22px;
+        }
+        .ca-section.sang .ca-section-icon { background: linear-gradient(135deg, #F39C12, #F8C471); }
+        .ca-section.chieu .ca-section-icon { background: linear-gradient(135deg, var(--primary-blue), #6FB1F5); }
+        .ca-section.toi .ca-section-icon { background: linear-gradient(135deg, var(--accent-purple), #BB8FCE); }
+
+        .ca-section-title h3 {
+            font-size: 20px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .ca-section-title p { font-size: 13px; color: var(--text-gray); }
+
+        .ca-section-stats { display: flex; gap: 25px; }
+        .ca-stat { text-align: center; }
+        .ca-stat .num {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary-blue);
+            line-height: 1;
+        }
+        .ca-section.sang .ca-stat .num { color: #F39C12; }
+        .ca-section.toi .ca-stat .num { color: var(--accent-purple); }
+        .ca-stat .lbl {
+            font-size: 11px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 3px;
+        }
+
+        .appt-row {
+            display: grid;
+            grid-template-columns: 100px 1fr auto;
+            gap: 20px;
+            align-items: center;
+            padding: 15px;
+            background: var(--bg-body);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .appt-row:hover { background: var(--primary-blue-soft); border-left-color: var(--primary-blue); }
+        .appt-row .time {
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary-blue);
+            font-size: 15px;
+        }
+        .appt-row .info h5 {
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 3px;
+        }
+        .appt-row .info p { font-size: 12px; color: var(--text-gray); margin: 0; }
+        .appt-row .actions { display: flex; gap: 8px; }
+
+        /* Nút đăng xuất đồng bộ */
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EF4444;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover {
+            background: #EF4444;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .appt-row { grid-template-columns: 1fr; text-align: center; }
+            .appt-row .actions { justify-content: center; }
+            .ca-section-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Cổng Lễ Tân</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/le_tan/dashboard.html">Tổng quan</a></li>
+                    <li><a href="/le_tan/quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                    <li><a href="/le_tan/danh_sach_lich_hen.html"><strong>Danh sách ca trực</strong></a></li>
+                    <li><a href="/le_tan/check_in.html">Check-in</a></li>
+                    <li><a href="/le_tan/vien_phi.html">Viện phí</a></li>
+                </ul>
+            </nav>
+            <div class="user-badge" onclick="window.location.href='ho_so_ca_nhan.html'">
+                <div class="user-avatar" id="topbar-avatar">LT</div>
+                <div class="user-info-text">
+                    <div class="user-name" id="topbar-receptionist-name">Lễ tân</div>
+                    <div class="user-role">Lễ tân</div>
+                </div>
+            </div>
+            <!-- Nút chuyển đổi sáng/tối -->
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi giao diện">
+                <i class="fas fa-moon"></i>
+            </button>
+            <!-- Nút Đăng xuất nằm cạnh nút giao diện -->
+            <button class="logout-btn" onclick="window.location.href='../dk_dn/dn.html'" title="Đăng xuất">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Danh sách ca trực</span>
+        </div>
+
+        <div class="page-title">
+            <div class="page-title-left">
+                <h2><i class="fas fa-list-ul"></i> Danh sách Lịch hẹn theo Ca</h2>
+                <p>Xem chi tiết các lịch hẹn được phân theo từng ca làm việc trong ngày</p>
+            </div>
+            <div>
+                <input type="date" id="date-filter" style="padding: 12px 16px; border: 1px solid var(--input-border); border-radius: 10px; font-family: 'Poppins'; background: var(--input-bg); color: var(--secondary-color);">
+            </div>
+        </div>
+
+        <div class="ca-sections" id="ca-sections-container"></div>
+    </main>
+
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Cổng Lễ Tân</p>
+                </div>
+            </div>
+            <p>Hệ thống quản lý y tế MedBooking - Giải pháp toàn diện cho bệnh viện và phòng khám.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="dashboard.html">Tổng quan</a></li>
+                <li><a href="quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                <li><a href="check_in.html">Check-in</a></li>
+                <li><a href="vien_phi.html">Viện phí</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <script src="../../static/js/client.js"></script>
+    <script src="../../static/js/LT_Store.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ============================================================
+            // ĐỒNG BỘ THÔNG TIN ĐĂNG NHẬP TỪ LOCALSTORAGE
+            // ============================================================
+            try {
+                let receptionistName = 'Lễ tân';
+                const loggedInUser = localStorage.getItem('medbooking_logged_in_user');
+                const currentUser = localStorage.getItem('medbooking_current_user');
+                const currentEmail = localStorage.getItem('medbooking_email');
+
+                if (loggedInUser) {
+                    const userData = JSON.parse(loggedInUser);
+                    receptionistName = userData.name || userData.fullname || userData.ho_ten || receptionistName;
+                } else if (currentUser) {
+                    const userData = JSON.parse(currentUser);
+                    receptionistName = userData.name || userData.fullname || userData.ho_ten || receptionistName;
+                } else if (currentEmail) {
+                    const users = JSON.parse(localStorage.getItem('medbooking_users')) || [];
+                    const found = users.find(u => u.email === currentEmail);
+                    if (found) {
+                        receptionistName = found.fullname || found.name || receptionistName;
+                    }
+                }
+
+                const topbarNameEl = document.getElementById('topbar-receptionist-name');
+                if (topbarNameEl) topbarNameEl.textContent = receptionistName;
+
+                const cleanName = receptionistName.trim();
+                const parts = cleanName.split(/\s+/);
+                let initials = 'LT';
+                if (parts.length >= 2) {
+                    initials = (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+                } else if (parts.length === 1 && parts[0].length > 0) {
+                    initials = parts[0].slice(0, 2).toUpperCase();
+                }
+
+                const topbarAvatar = document.getElementById('topbar-avatar');
+                if (topbarAvatar) topbarAvatar.textContent = initials;
+
+            } catch (e) {
+                console.error("Không thể tải thông tin lễ tân từ localStorage:", e);
+            }
+
+            // THEME
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+
+            // STATE
+            let selectedDate = new Date().toISOString().split('T')[0];
+            let appointments = [];
+
+            document.getElementById('date-filter').value = selectedDate;
+
+            // LOAD
+            function loadData() {
+                appointments = LT_Store.getAppointments();
+                render();
+            }
+
+            // RENDER
+            function render() {
+                const container = document.getElementById('ca-sections-container');
+                const dayAppts = appointments.filter(a => a.date === selectedDate);
+
+                const caConfig = [
+                    { key: 'sang', label: 'Ca Sáng', time: '07:30 - 11:30', icon: 'fa-sun' },
+                    { key: 'chieu', label: 'Ca Chiều', time: '13:30 - 18:30', icon: 'fa-cloud-sun' },
+                    { key: 'toi', label: 'Ca Tối (Ngoài giờ)', time: '18:30 - 22:30', icon: 'fa-moon', extra: 'Phụ thu +10% phí' }
+                ];
+
+                let html = '';
+                caConfig.forEach(ca => {
+                    const caAppts = dayAppts
+                        .filter(a => a.ca === ca.key)
+                        .sort((a, b) => a.time.localeCompare(b.time));
+
+                    const total = caAppts.length;
+                    const checked = caAppts.filter(a => a.status === 'checked').length;
+                    const waiting = caAppts.filter(a => a.status === 'pending' || a.status === 'confirmed').length;
+
+                    html += `
+                        <div class="ca-section ${ca.key}">
+                            <div class="ca-section-header">
+                                <div class="ca-section-title">
+                                    <div class="ca-section-icon"><i class="fas ${ca.icon}"></i></div>
+                                    <div>
+                                        <h3>${ca.label}</h3>
+                                        <p><i class="far fa-clock"></i> ${ca.time} 
+                                            ${ca.extra ? `<span style="color: var(--accent-red); font-weight: 600;">(${ca.extra})</span>` : ''}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="ca-section-stats">
+                                    <div class="ca-stat">
+                                        <div class="num">${total}</div>
+                                        <div class="lbl">Tổng lịch</div>
+                                    </div>
+                                    <div class="ca-stat">
+                                        <div class="num">${checked}</div>
+                                        <div class="lbl">Đã check-in</div>
+                                    </div>
+                                    <div class="ca-stat">
+                                        <div class="num">${waiting}</div>
+                                        <div class="lbl">Chờ khám</div>
+                                    </div>
+                                </div>
+                            </div>
+                            ${caAppts.length === 0 
+                                ? `<div style="text-align:center; padding: 30px; color: var(--text-gray); font-size: 13px;">
+                                   <i class="fas fa-calendar-times" style="font-size: 30px; opacity: 0.3; margin-bottom: 8px;"></i>
+                                   <p>Không có lịch hẹn nào trong ca này</p>
+                                   </div>`
+                                : caAppts.map(appt => renderApptRow(appt)).join('')
+                            }
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            function renderApptRow(appt) {
+                let actionHTML = '';
+
+                if (appt.status === 'pending' || appt.status === 'confirmed') {
+                    actionHTML = `
+                        <button class="btn btn-primary btn-sm" onclick="window.location.href='check_in.html?id=${appt.id}'">
+                            <i class="fas fa-sign-in-alt"></i> Check-in
+                        </button>
+                    `;
+                } else if (appt.status === 'checked') {
+                    actionHTML = `<span class="status-badge checked"><i class="fas fa-check"></i> Đã check-in</span>`;
+                } else if (appt.status === 'cancelled') {
+                    actionHTML = `<span class="status-badge cancelled"><i class="fas fa-times"></i> Đã hủy</span>`;
+                } else if (appt.status === 'noshow') {
+                    actionHTML = `<span class="status-badge noshow"><i class="fas fa-user-slash"></i> Không đến</span>`;
+                }
+
+                return `
+                    <div class="appt-row">
+                        <div class="time">${appt.time}</div>
+                        <div class="info">
+                            <h5>${appt.patientName} • ${appt.id}</h5>
+                            <p><i class="fas fa-user-md"></i> ${appt.doctor} • ${appt.symptom}</p>
+                        </div>
+                        <div class="actions">${actionHTML}</div>
+                    </div>
+                `;
+            }
+
+            // CHANGE DATE
+            document.getElementById('date-filter').addEventListener('change', function() {
+                selectedDate = this.value;
+                render();
+            });
+
+            // INIT
+            loadData();
+
+            // Multi-tab sync
+            window.addEventListener('storage', function(e) {
+                if (e.key && e.key.startsWith('medbooking_')) {
+                    loadData();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedBooking - Đặt lịch Khám bệnh</title>
+    <!-- Favicon chuẩn hình trái tim hồng sóng điện tim -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="../../static/css/BN.css">
+    
+    <style>
+        main {
+            max-width: 1000px;
+            margin: 40px auto 80px;
+            padding: 0 20px;
+        }
+
+        .page-title { margin-bottom: 30px; }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .progress-container::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 0;
+            width: 100%; height: 2px;
+            background: var(--border-glass);
+            z-index: 1;
+        }
+
+        .progress-step {
+            width: 35px; height: 35px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-gray);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            background: var(--primary-pink);
+            border-color: var(--primary-pink);
+            color: #fff;
+            box-shadow: 0 0 0 5px rgba(255, 107, 157, 0.2);
+        }
+
+        .progress-step.completed {
+            background: var(--primary-pink-light);
+            border-color: var(--primary-pink);
+            color: var(--primary-pink);
+        }
+
+        .form-step { display: none; animation: fadeIn 0.5s ease-out; }
+        .form-step.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-card {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            margin-bottom: 30px;
+        }
+
+        .step-card h3 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: var(--primary-pink);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-pink-light);
+        }
+
+        .step-card h3 i {
+            font-size: 20px;
+            background: var(--primary-pink-light);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-select-wrapper { position: relative; user-select: none; width: 100%; }
+
+        .custom-select-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            background: var(--input-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            color: var(--secondary-color);
+        }
+
+        .custom-select-trigger:hover { border-color: var(--primary-pink); box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.1); }
+        .custom-select-trigger.active { border-color: var(--primary-pink); box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.15); }
+        .custom-select-trigger .placeholder { color: var(--text-gray); opacity: 0.7; }
+        .custom-select-trigger .selected-value { color: var(--secondary-color); font-weight: 500; }
+        .custom-select-trigger i.fa-chevron-down { color: var(--primary-pink); font-size: 14px; transition: transform 0.3s; }
+        .custom-select-trigger.active i.fa-chevron-down { transform: rotate(180deg); }
+
+        .custom-options {
+            position: absolute;
+            top: 100%; left: 0; right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            margin-top: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .custom-options.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .custom-option {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .custom-option:hover { background: var(--primary-pink-light); color: var(--primary-pink); padding-left: 25px; }
+        .custom-option.selected { background: var(--primary-pink); color: #fff; }
+
+        .date-picker-wrapper { position: relative; width: 100%; }
+
+        .date-picker-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            background: var(--input-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            color: var(--secondary-color);
+        }
+
+        .date-picker-trigger:hover { border-color: var(--primary-pink); box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.1); }
+        .date-picker-trigger.active { border-color: var(--primary-pink); box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.15); }
+        .date-picker-trigger .placeholder { color: var(--text-gray); opacity: 0.7; }
+        .date-picker-trigger .selected-value { color: var(--secondary-color); font-weight: 500; }
+        .date-picker-trigger i { color: var(--primary-pink); }
+
+        .calendar-dropdown {
+            position: absolute;
+            top: 100%; left: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            margin-top: 8px;
+            padding: 20px;
+            width: 340px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .calendar-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-header h4 {
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .calendar-nav-btn {
+            background: var(--primary-pink-light);
+            border: none;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--primary-pink);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-nav-btn:hover:not(:disabled) { background: var(--primary-pink); color: #fff; }
+        .calendar-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; }
+        .calendar-weekdays div { text-align: center; font-size: 12px; font-weight: 600; color: var(--text-gray); padding: 5px 0; }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--secondary-color);
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .calendar-day:hover:not(.disabled):not(.empty) {
+            background: var(--primary-pink-light);
+            color: var(--primary-pink);
+            border-color: var(--primary-pink);
+        }
+
+        .calendar-day.selected { background: var(--primary-pink); color: #fff; font-weight: 600; box-shadow: 0 4px 10px rgba(255, 107, 157, 0.3); }
+        .calendar-day.today { border-color: var(--primary-pink); font-weight: 700; color: var(--primary-pink); }
+        .calendar-day.disabled { color: var(--text-gray); opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
+        .calendar-day.empty { cursor: default; }
+
+        .time-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-slot { position: relative; }
+        .time-slot input[type="radio"] { display: none; }
+
+        .time-slot label {
+            display: block;
+            text-align: center;
+            padding: 12px 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            background: var(--input-bg);
+            color: var(--text-gray);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .time-slot label:hover { border-color: var(--primary-pink); color: var(--primary-pink); background: var(--primary-pink-light); }
+
+        .time-slot input[type="radio"]:checked + label {
+            background: var(--primary-pink);
+            border-color: var(--primary-pink);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(255, 107, 157, 0.3);
+        }
+
+        .time-slot label span { display: block; font-size: 11px; font-weight: 400; margin-top: 4px; opacity: 0.8; }
+
+        .time-slot label.disabled,
+        .time-slot input[type="radio"]:disabled + label {
+            opacity: 0.4;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            background: var(--bg-body);
+            color: var(--text-gray);
+            border-color: var(--border-glass);
+        }
+
+        .time-slot label.disabled:hover,
+        .time-slot input[type="radio"]:disabled + label:hover {
+            background: var(--bg-body);
+            color: var(--text-gray);
+            border-color: var(--border-glass);
+            transform: none;
+        }
+
+        .time-slot label .slot-note {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 3px;
+            color: var(--primary-pink);
+            text-transform: uppercase;
+        }
+
+        .time-slot label.disabled .slot-note { color: var(--text-gray); }
+
+        .warning-box {
+            background: #FFF3CD;
+            color: #856404;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border-left: 4px solid #FFC107;
+            font-size: 14px;
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .warning-box i { font-size: 18px; margin-top: 2px; flex-shrink: 0; }
+        .warning-box .warning-content strong { display: block; margin-bottom: 5px; color: #856404; }
+        .warning-box ul { margin-top: 8px; padding-left: 0; }
+        .warning-box ul li { font-size: 13px; margin-bottom: 4px; padding-left: 20px; position: relative; }
+        .warning-box ul li::before { content: '•'; position: absolute; left: 8px; color: #FFC107; font-weight: bold; }
+
+        [data-theme="dark"] .warning-box { background: #4A3F1A; color: #FFD966; border-left-color: #FFC107; }
+        [data-theme="dark"] .warning-box .warning-content strong { color: #FFD966; }
+
+        .step-actions { display: flex; justify-content: space-between; gap: 15px; margin-top: 20px; }
+        .btn { padding: 14px 35px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: none; display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif; }
+
+        @media (max-width: 900px) {
+            .step-card { padding: 25px; }
+            .step-actions { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .calendar-dropdown { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Chăm sóc sức khỏe toàn diện</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/benh_nhan/home_bn.html">Trang chủ</a></li>
+                    <li><a href="/benh_nhan/danh_sach_bac_si.html">Tìm kiếm Bác sĩ</a></li>
+                    <li><a href="/benh_nhan/dat_lich.html"><strong>Đặt lịch khám</strong></a></li>
+                    <li><a href="/benh_nhan/danh_sach_lich_hen.html">Lịch hẹn của tôi</a></li>
+                    <li><a href="/benh_nhan/ho_so_ca_nhan.html">Hồ sơ cá nhân</a></li>
+                    <li><a href="/dk_dn/dn.html">Đăng xuất</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi chế độ Sáng/Tối">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-title">
+            <h2>Đăng ký Lịch khám Bệnh</h2>
+            <p>Vui lòng hoàn thành các bước bên dưới để đặt lịch hẹn</p>
+        </div>
+
+        <div class="prefill-banner" id="prefill-banner" style="display: none;">
+            <div class="banner-avatar" id="banner-avatar"></div>
+            <div class="banner-info">
+                <h4 id="banner-doctor-name"></h4>
+                <p>Thông tin bác sĩ đã được điền sẵn. Vui lòng chọn thời gian khám.</p>
+                <span class="specialty-tag" id="banner-specialty"></span>
+            </div>
+            <i class="fas fa-calendar-check banner-icon"></i>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-step active" id="step-indicator-1">1</div>
+            <div class="progress-step" id="step-indicator-2">2</div>
+            <div class="progress-step" id="step-indicator-3">3</div>
+        </div>
+
+        <form action="danh_sach_lich_hen.html" method="GET" id="booking-form">
+            
+            <div class="form-step active" id="step-1">
+                <div class="step-card">
+                    <h3><i class="fas fa-user-md"></i> Bước 1: Chọn Chuyên khoa & Bác sĩ</h3>
+                    
+                    <div class="form-group">
+                        <label>Chọn chuyên khoa:</label>
+                        <div class="custom-select-wrapper" id="specialty-dropdown">
+                            <div class="custom-select-trigger" onclick="toggleDropdown('specialty')">
+                                <span class="placeholder" id="specialty-label">-- Chọn chuyên khoa khám --</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="custom-options" id="specialty-options"></div>
+                            <input type="hidden" name="specialty" id="specialty-value">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Chọn Bác sĩ (Tùy chọn):</label>
+                        <div class="custom-select-wrapper" id="doctor-dropdown">
+                            <div class="custom-select-trigger" onclick="toggleDropdown('doctor')">
+                                <span class="placeholder" id="doctor-label">-- Bất kỳ bác sĩ nào phù hợp --</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="custom-options" id="doctor-options"></div>
+                            <input type="hidden" name="doctor_id" id="doctor-value">
+                        </div>
+                    </div>
+                </div>
+                <div class="step-actions" style="justify-content: flex-end;">
+                    <button type="button" class="btn btn-primary" onclick="nextStep(1)">Tiếp tục <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="form-step" id="step-2">
+                <div class="step-card">
+                    <h3><i class="fas fa-calendar-alt"></i> Bước 2: Chọn Thời gian khám</h3>
+                    
+                    <div class="form-group">
+                        <label>Ngày khám (Chỉ được chọn trong vòng 30 ngày tới):</label>
+                        <div class="date-picker-wrapper" id="date-picker-wrapper">
+                            <div class="date-picker-trigger" onclick="toggleCalendar()">
+                                <span class="placeholder" id="date-label">-- Chọn ngày khám --</span>
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="calendar-dropdown" id="calendar-dropdown">
+                                <div class="calendar-header">
+                                    <button type="button" class="calendar-nav-btn" id="prev-month" onclick="changeMonth(-1)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h4 id="calendar-month-year">Tháng 10/2026</h4>
+                                    <button type="button" class="calendar-nav-btn" id="next-month" onclick="changeMonth(1)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="calendar-weekdays">
+                                    <div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div><div>CN</div>
+                                </div>
+                                <div class="calendar-days" id="calendar-days"></div>
+                            </div>
+                            <input type="hidden" name="date" id="appointment-date">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Khung giờ khám:</label>
+                        
+                        <p style="font-weight: 600; margin: 15px 0 5px; color: var(--primary-pink);">Ca sáng (07:30 - 11:30)</p>
+                        <div class="time-slots-grid">
+                            <div class="time-slot"><input type="radio" id="time-1" name="time_slot" value="07:30-08:30"><label for="time-1">07:30 - 08:30</label></div>
+                            <div class="time-slot"><input type="radio" id="time-2" name="time_slot" value="08:30-09:30"><label for="time-2">08:30 - 09:30</label></div>
+                            <div class="time-slot"><input type="radio" id="time-3" name="time_slot" value="09:30-10:30"><label for="time-3">09:30 - 10:30</label></div>
+                            <div class="time-slot"><input type="radio" id="time-4" name="time_slot" value="10:30-11:30"><label for="time-4">10:30 - 11:30</label></div>
+                        </div>
+                        
+                        <p style="font-weight: 600; margin: 20px 0 5px; color: var(--primary-pink);">Ca chiều (13:30 - 18:30)</p>
+                        <div class="time-slots-grid">
+                            <div class="time-slot"><input type="radio" id="time-5" name="time_slot" value="13:30-14:30"><label for="time-5">13:30 - 14:30</label></div>
+                            <div class="time-slot"><input type="radio" id="time-6" name="time_slot" value="14:30-15:30"><label for="time-6">14:30 - 15:30</label></div>
+                            <div class="time-slot"><input type="radio" id="time-7" name="time_slot" value="15:30-16:30"><label for="time-7">15:30 - 16:30</label></div>
+                            <div class="time-slot"><input type="radio" id="time-8" name="time_slot" value="16:30-17:30"><label for="time-8">16:30 - 17:30</label></div>
+                            <div class="time-slot"><input type="radio" id="time-9" name="time_slot" value="17:30-18:30"><label for="time-9">17:30 - 18:30</label></div>
+                        </div>
+                        
+                        <p style="font-weight: 600; margin: 20px 0 5px; color: var(--primary-pink);">Ca tối ngoài giờ (18:30 - 22:30) - Phụ thu +10% phí</p>
+                        <div class="time-slots-grid">
+                            <div class="time-slot"><input type="radio" id="time-10" name="time_slot" value="18:30-19:30"><label for="time-10">18:30 - 19:30 <span>+10% phí</span></label></div>
+                            <div class="time-slot"><input type="radio" id="time-11" name="time_slot" value="19:30-20:30"><label for="time-11">19:30 - 20:30 <span>+10% phí</span></label></div>
+                            <div class="time-slot"><input type="radio" id="time-12" name="time_slot" value="20:30-21:30"><label for="time-12">20:30 - 21:30 <span>+10% phí</span></label></div>
+                            <div class="time-slot"><input type="radio" id="time-13" name="time_slot" value="21:30-22:30"><label for="time-13">21:30 - 22:30 <span>+10% phí</span></label></div>
+                        </div>
+                        
+                        <div class="warning-box" id="conflict-warning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div class="warning-content" id="conflict-content"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-actions">
+                    <button type="button" class="btn btn-outline" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">Tiếp tục <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="form-step" id="step-3">
+                <div class="step-card">
+                    <h3><i class="fas fa-notes-medical"></i> Bước 3: Triệu chứng & Xác nhận</h3>
+                    <div class="form-group">
+                        <label for="patient-symptoms">Mô tả triệu chứng / Ghi chú cho bác sĩ:</label>
+                        <textarea id="patient-symptoms" name="symptoms" rows="5" placeholder="Ví dụ: Đau đầu kéo dài, sốt nhẹ về chiều, mệt mỏi..."></textarea>
+                    </div>
+                </div>
+                <div class="step-actions">
+                    <button type="button" class="btn btn-outline" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-check-circle"></i> Xác nhận đặt lịch</button>
+                </div>
+            </div>
+
+        </form>
+    </main>
+
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Chăm sóc sức khỏe toàn diện</p>
+                </div>
+            </div>
+            <p>Nền tảng công nghệ y tế kết nối người bệnh với các bệnh viện và phòng khám uy tín hàng đầu. Cam kết quy trình nhanh gọn, minh bạch chi phí và bảo mật thông tin tuyệt đối.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào, bình an và hạnh phúc!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="home_bn.html">Trang chủ</a></li>
+                <li><a href="danh_sach_bac_si.html">Tìm kiếm Bác sĩ</a></li>
+                <li><a href="dat_lich.html">Đặt lịch khám</a></li>
+                <li><a href="danh_sach_lich_hen.html">Lịch hẹn cá nhân</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ & Địa chỉ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon"><i class="fas fa-info"></i></div>
+            <h3 id="modal-title">Thông báo</h3>
+            <div class="modal-details" id="modal-details" style="display: none;"></div>
+            <p id="modal-message">Nội dung thông báo</p>
+            <div class="modal-actions" id="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="modal-confirm-btn">
+                    <i class="fas fa-check"></i> Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../static/js/BN_Store.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        const themeToggle = document.getElementById('theme-toggle');
+        const icon = themeToggle.querySelector('i');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+
+        themeToggle.addEventListener('click', function() {
+            let theme = document.documentElement.getAttribute('data-theme');
+            if (theme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });
+
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalIcon = document.getElementById('modal-icon');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalDetails = document.getElementById('modal-details');
+        const modalActions = document.getElementById('modal-actions');
+
+        window.showAlert = function(title, message, type = 'info', callback = null, details = null) {
+            modalIcon.className = 'modal-icon ' + type;
+            const iconEl = modalIcon.querySelector('i');
+            const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+            iconEl.className = 'fas ' + icons[type];
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            
+            if (details && Object.keys(details).length > 0) {
+                let detailHTML = '';
+                for (const [key, value] of Object.entries(details)) {
+                    detailHTML += `<div class="detail-row"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+                }
+                modalDetails.innerHTML = detailHTML;
+                modalDetails.style.display = 'block';
+            } else {
+                modalDetails.style.display = 'none';
+            }
+            
+            modalActions.innerHTML = `<button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đã hiểu</button>`;
+            modalOverlay.classList.add('active');
+            document.getElementById('modal-confirm-btn').onclick = function() {
+                closeModal();
+                if (callback) callback();
+            };
+        };
+
+        function closeModal() { modalOverlay.classList.remove('active'); }
+        modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
+
+        const specialties = [
+            { id: 'noi', name: '1. Nội Tổng Quát' },
+            { id: 'tim-mach', name: '2. Tim Mạch' },
+            { id: 'nhi', name: '3. Nhi Khoa' },
+            { id: 'than-kinh', name: '4. Thần Kinh' },
+            { id: 'xuong-khop', name: '5. Cơ Xương Khớp' },
+            { id: 'da-lieu', name: '6. Da Liễu' },
+            { id: 'tai-mui-hong', name: '7. Tai Mũi Họng' },
+            { id: 'mat', name: '8. Mắt' },
+            { id: 'rang-ham-mat', name: '9. Răng Hàm Mặt' },
+            { id: 'y-hoc-co-truyen', name: '10. Y Học Cổ Truyền' }
+        ];
+        const doctors = [
+            { id: 'bs01', name: 'ThS.BS Nguyễn Văn A', specialtyId: 'noi', avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { id: 'bs02', name: 'BS.CKI Trần Thị C', specialtyId: 'tim-mach', avatar: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { id: 'bs03', name: 'TS.BS Lê Hoàng D', specialtyId: 'than-kinh', avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { id: 'bs04', name: 'BS.CKII Phạm Văn E', specialtyId: 'xuong-khop', avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { id: 'bs05', name: 'BS. Nguyễn Thị Nhi', specialtyId: 'nhi', avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { id: 'bs06', name: 'BS. Trần Văn Mắt', specialtyId: 'mat', avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' }
+        ];
+
+        const bookedSlots = {
+            'bs01': { '2026-10-15': ['08:30-09:30', '09:30-10:30', '14:30-15:30'], '2026-10-16': ['07:30-08:30', '15:30-16:30'] },
+            'bs02': { '2026-10-15': ['10:30-11:30', '16:30-17:30'], '2026-10-17': ['08:30-09:30', '13:30-14:30'] },
+            'bs03': { '2026-10-14': ['09:30-10:30'], '2026-10-15': ['07:30-08:30', '13:30-14:30', '18:30-19:30'] }
+        };
+
+        const doctorSchedules = {
+            'bs01': [1, 2, 3, 4, 5],
+            'bs02': [1, 2, 3, 4, 5],
+            'bs03': [1, 2, 3, 4, 5, 6],
+            'bs04': [1, 3, 5],
+            'bs05': [1, 2, 3, 4, 5],
+            'bs06': [2, 4, 6]
+        };
+
+        function getDoctorName(doctorId) { const doc = doctors.find(d => d.id === doctorId); return doc ? doc.name : doctorId; }
+        function getSpecialtyName(specialtyId) { const spec = specialties.find(s => s.id === specialtyId); return spec ? spec.name : specialtyId; }
+        function formatDateDisplay(dateStr) { if (!dateStr) return ''; const date = new Date(dateStr); return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`; }
+        function getDayOfWeekName(dateStr) { const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']; return days[new Date(dateStr).getDay()]; }
+        function isSlotBooked(doctorId, dateStr, timeSlot) { if (!doctorId || !dateStr || !timeSlot) return false; if (!bookedSlots[doctorId]) return false; if (!bookedSlots[doctorId][dateStr]) return false; return bookedSlots[doctorId][dateStr].includes(timeSlot); }
+        
+        function isPatientBusy(dateStr, timeSlot) {
+            const myAppts = BN_Store.getAppointments();
+            return myAppts.some(appt => 
+                appt.date === dateStr && 
+                appt.time === timeSlot && 
+                appt.status !== 'cancelled'
+            );
+        }
+        
+        function isDoctorWorking(doctorId, dateStr) { if (!doctorId || !dateStr) return true; if (!doctorSchedules[doctorId]) return true; return doctorSchedules[doctorId].includes(new Date(dateStr).getDay()); }
+
+        const specialtyOptionsContainer = document.getElementById('specialty-options');
+        const doctorOptionsContainer = document.getElementById('doctor-options');
+        const specialtyLabel = document.getElementById('specialty-label');
+        const doctorLabel = document.getElementById('doctor-label');
+        const specialtyValue = document.getElementById('specialty-value');
+        const doctorValue = document.getElementById('doctor-value');
+
+        function renderSpecialtyOptions() {
+            specialtyOptionsContainer.innerHTML = '';
+            specialties.forEach(spec => {
+                const div = document.createElement('div');
+                div.className = 'custom-option';
+                div.textContent = spec.name;
+                div.dataset.value = spec.id;
+                div.onclick = (e) => { e.stopPropagation(); selectOption('specialty', spec.id, spec.name); };
+                specialtyOptionsContainer.appendChild(div);
+            });
+        }
+
+        function renderDoctorOptions(filterSpecialtyId = null) {
+            doctorOptionsContainer.innerHTML = '';
+            const anyDiv = document.createElement('div');
+            anyDiv.className = 'custom-option';
+            anyDiv.textContent = '-- Bất kỳ bác sĩ nào phù hợp --';
+            anyDiv.onclick = (e) => { e.stopPropagation(); selectOption('doctor', '', '-- Bất kỳ bác sĩ nào phù hợp --'); };
+            doctorOptionsContainer.appendChild(anyDiv);
+
+            let filteredDoctors = doctors;
+            if (filterSpecialtyId) filteredDoctors = doctors.filter(doc => doc.specialtyId === filterSpecialtyId);
+
+            if (filteredDoctors.length === 0 && filterSpecialtyId) {
+                const noDocDiv = document.createElement('div');
+                noDocDiv.className = 'custom-option';
+                noDocDiv.textContent = 'Chưa có bác sĩ cho chuyên khoa này';
+                noDocDiv.style.color = 'var(--text-gray)';
+                noDocDiv.style.cursor = 'default';
+                doctorOptionsContainer.appendChild(noDocDiv);
+            } else {
+                filteredDoctors.forEach(doc => {
+                    const div = document.createElement('div');
+                    div.className = 'custom-option';
+                    div.textContent = doc.name;
+                    div.onclick = (e) => { e.stopPropagation(); selectOption('doctor', doc.id, doc.name); };
+                    doctorOptionsContainer.appendChild(div);
+                });
+            }
+        }
+
+        function selectOption(type, value, text) {
+            if (type === 'specialty') {
+                specialtyLabel.textContent = text;
+                specialtyLabel.classList.remove('placeholder');
+                specialtyLabel.classList.add('selected-value');
+                specialtyValue.value = value;
+                doctorLabel.textContent = '-- Bất kỳ bác sĩ nào phù hợp --';
+                doctorLabel.classList.add('placeholder');
+                doctorLabel.classList.remove('selected-value');
+                doctorValue.value = '';
+                renderDoctorOptions(value);
+            } else if (type === 'doctor') {
+                if (value === '') {
+                    doctorLabel.textContent = text;
+                    doctorLabel.classList.add('placeholder');
+                    doctorLabel.classList.remove('selected-value');
+                } else {
+                    doctorLabel.textContent = text;
+                    doctorLabel.classList.remove('placeholder');
+                    doctorLabel.classList.add('selected-value');
+                }
+                doctorValue.value = value;
+            }
+            closeAllDropdowns();
+            renderTimeSlots();
+        }
+
+        window.toggleDropdown = function(type) {
+            const wrapper = document.getElementById(type + '-dropdown');
+            const options = wrapper.querySelector('.custom-options');
+            const trigger = wrapper.querySelector('.custom-select-trigger');
+            document.querySelectorAll('.custom-options').forEach(el => { if (el !== options) el.classList.remove('open'); });
+            document.querySelectorAll('.custom-select-trigger').forEach(el => { if (el !== trigger) el.classList.remove('active'); });
+            document.querySelectorAll('.calendar-dropdown').forEach(el => el.classList.remove('open'));
+            options.classList.toggle('open');
+            trigger.classList.toggle('active');
+        };
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.custom-options').forEach(el => el.classList.remove('open'));
+            document.querySelectorAll('.custom-select-trigger').forEach(el => el.classList.remove('active'));
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-wrapper') && !e.target.closest('.date-picker-wrapper')) {
+                closeAllDropdowns();
+                document.querySelectorAll('.calendar-dropdown').forEach(el => el.classList.remove('open'));
+                document.querySelectorAll('.date-picker-trigger').forEach(el => el.classList.remove('active'));
+            }
+        });
+
+        renderSpecialtyOptions();
+        renderDoctorOptions();
+
+        const dateLabel = document.getElementById('date-label');
+        const appointmentDate = document.getElementById('appointment-date');
+        const calendarDays = document.getElementById('calendar-days');
+        const calendarMonthYear = document.getElementById('calendar-month-year');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        const calendarDropdown = document.getElementById('calendar-dropdown');
+        const datePickerTrigger = document.querySelector('.date-picker-trigger');
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const minDate = new Date(today); minDate.setDate(minDate.getDate() + 1);
+        const maxDate = new Date(today); maxDate.setDate(maxDate.getDate() + 30);
+
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+        let selectedDate = null;
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        function formatDisplayDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `${day}/${month}/${date.getFullYear()}`;
+        }
+
+        window.toggleCalendar = function() {
+            calendarDropdown.classList.toggle('open');
+            datePickerTrigger.classList.toggle('active');
+            closeAllDropdowns();
+            if (calendarDropdown.classList.contains('open')) renderCalendar();
+        };
+
+        function renderCalendar() {
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            
+            let startDay = firstDay.getDay();
+            startDay = startDay === 0 ? 6 : startDay - 1;
+
+            calendarMonthYear.textContent = `Tháng ${currentMonth + 1}/${currentYear}`;
+            prevMonthBtn.disabled = (currentYear === today.getFullYear() && currentMonth === today.getMonth());
+            nextMonthBtn.disabled = (currentYear === maxDate.getFullYear() && currentMonth === maxDate.getMonth());
+
+            let html = '';
+            for (let i = 0; i < startDay; i++) html += `<div class="calendar-day empty"></div>`;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                date.setHours(0, 0, 0, 0);
+                
+                let classes = 'calendar-day';
+                let isDisabled = false;
+
+                if (date < minDate || date > maxDate) { classes += ' disabled'; isDisabled = true; }
+                if (date.getTime() === today.getTime()) classes += ' today';
+                if (selectedDate && date.getTime() === selectedDate.getTime()) classes += ' selected';
+
+                const clickHandler = isDisabled ? '' : `onclick="selectDate(${currentYear}, ${currentMonth}, ${day})"`;
+                html += `<div class="${classes}" ${clickHandler}>${day}</div>`;
+            }
+
+            calendarDays.innerHTML = html;
+        }
+
+        window.changeMonth = function(direction) {
+            currentMonth += direction;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+        };
+
+        window.selectDate = function(year, month, day) {
+            selectedDate = new Date(year, month, day);
+            selectedDate.setHours(0, 0, 0, 0);
+            appointmentDate.value = formatDate(selectedDate);
+            dateLabel.textContent = formatDisplayDate(selectedDate);
+            dateLabel.classList.remove('placeholder');
+            dateLabel.classList.add('selected-value');
+            calendarDropdown.classList.remove('open');
+            datePickerTrigger.classList.remove('active');
+            renderCalendar();
+            renderTimeSlots();
+        };
+
+        function renderTimeSlots() {
+            const selectedDoctorId = doctorValue.value;
+            const selectedDateStr = appointmentDate.value;
+            const timeSlotInputs = document.querySelectorAll('input[name="time_slot"]');
+            const warningBox = document.getElementById('conflict-warning');
+            const warningContent = document.getElementById('conflict-content');
+            
+            if (!selectedDoctorId || !selectedDateStr) {
+                timeSlotInputs.forEach(input => {
+                    input.disabled = false; input.checked = false;
+                    const label = document.querySelector(`label[for="${input.id}"]`);
+                    label.classList.remove('disabled'); label.title = '';
+                    const note = label.querySelector('.slot-note'); if (note) note.remove();
+                });
+                warningBox.style.display = 'none';
+                return;
+            }
+            
+            if (!isDoctorWorking(selectedDoctorId, selectedDateStr)) {
+                const dayOfWeek = getDayOfWeekName(selectedDateStr);
+                warningContent.innerHTML = `
+                    <strong>Bác sĩ không làm việc vào ngày này</strong>
+                    <div style="margin-top:8px; font-size:13px;">
+                        <div>📅 Ngày đã chọn: <strong>${formatDateDisplay(selectedDateStr)}</strong> (${dayOfWeek})</div>
+                        <div>👨‍⚕️ Bác sĩ: <strong>${getDoctorName(selectedDoctorId)}</strong></div>
+                    </div>
+                    <div style="margin-top:10px; font-size:13px; font-style:italic;">💡 Vui lòng chọn ngày khác trong tuần.</div>
+                `;
+                warningBox.style.display = 'flex';
+                timeSlotInputs.forEach(input => {
+                    input.disabled = true; input.checked = false;
+                    const label = document.querySelector(`label[for="${input.id}"]`);
+                    label.classList.add('disabled'); label.title = 'Bác sĩ không làm việc ngày này';
+                });
+                return;
+            }
+            
+            const bookedList = [], busyList = [];
+            timeSlotInputs.forEach(input => {
+                const slotValue = input.value;
+                const label = document.querySelector(`label[for="${input.id}"]`);
+                input.disabled = false; input.checked = false;
+                label.classList.remove('disabled'); label.title = '';
+                const existingNote = label.querySelector('.slot-note'); if (existingNote) existingNote.remove();
+                
+                const booked = isSlotBooked(selectedDoctorId, selectedDateStr, slotValue);
+                const patientBusy = isPatientBusy(selectedDateStr, slotValue);
+                
+                if (booked) {
+                    input.disabled = true; label.classList.add('disabled'); label.title = 'Khung giờ này đã được đặt';
+                    const note = document.createElement('span'); note.className = 'slot-note'; note.textContent = 'Đã đặt'; label.appendChild(note);
+                    bookedList.push(slotValue);
+                } else if (patientBusy) {
+                    input.disabled = true; label.classList.add('disabled'); label.title = 'Bạn đã có lịch hẹn vào giờ này';
+                    const note = document.createElement('span'); note.className = 'slot-note'; note.textContent = 'Bạn bận'; label.appendChild(note);
+                    busyList.push(slotValue);
+                }
+            });
+            
+            const totalConflicts = bookedList.length + busyList.length;
+            if (totalConflicts > 0) {
+                let html = '';
+                if (bookedList.length > 0) {
+                    html += `<strong>⏰ Có ${bookedList.length} khung giờ đã được đặt</strong><ul>${bookedList.map(slot => `<li>${slot} - Đã có người đặt</li>`).join('')}</ul>`;
+                }
+                if (busyList.length > 0) {
+                    html += `<strong style="margin-top: 10px; display: block;">👤 Có ${busyList.length} khung giờ trùng với lịch của bạn</strong><ul>${busyList.map(slot => `<li>${slot} - Bạn đã có lịch hẹn</li>`).join('')}</ul>`;
+                }
+                html += `<div style="margin-top:10px; font-size:12px; font-style:italic;">💡 Các khung giờ bị gạch ngang không thể chọn.</div>`;
+                warningContent.innerHTML = html;
+                warningBox.style.display = 'flex';
+            } else {
+                warningBox.style.display = 'none';
+            }
+        }
+
+        function getUrlParam(name) { return new URLSearchParams(window.location.search).get(name); }
+
+        function showPrefillBanner(doctorName, specialtyName, doctorAvatar, isRebook = false) {
+            const banner = document.getElementById('prefill-banner');
+            if (banner) {
+                banner.style.display = 'flex';
+                document.getElementById('banner-doctor-name').textContent = isRebook ? `Đặt lại lịch với ${doctorName}` : `Đang đặt lịch với ${doctorName}`;
+                document.getElementById('banner-specialty').textContent = specialtyName;
+                document.getElementById('banner-avatar').style.backgroundImage = `url('${doctorAvatar}')`;
+            }
+        }
+
+        function prefillFromDoctor(doctorId) {
+            const doctor = doctors.find(d => d.id === doctorId);
+            if (!doctor) return false;
+            const specialty = specialties.find(s => s.id === doctor.specialtyId);
+            if (specialty) selectOption('specialty', specialty.id, specialty.name);
+            setTimeout(() => selectOption('doctor', doctor.id, doctor.name), 50);
+            showPrefillBanner(doctor.name, specialty ? specialty.name : '', doctor.avatar);
+            setTimeout(() => {
+                document.getElementById('step-1').classList.remove('active');
+                document.getElementById('step-2').classList.add('active');
+                updateProgress(2);
+            }, 150);
+            return true;
+        }
+
+        function prefillFromRebook(appointmentId) {
+            const appt = BN_Store.getAppointmentById(appointmentId);
+            if (!appt) return false;
+            
+            const doctor = doctors.find(d => d.id === appt.doctorId);
+            if (!doctor) return false;
+            
+            const specialty = specialties.find(s => s.id === doctor.specialtyId);
+            if (specialty) selectOption('specialty', specialty.id, specialty.name);
+            
+            setTimeout(() => {
+                selectOption('doctor', doctor.id, doctor.name);
+                document.getElementById('patient-symptoms').value = appt.symptom;
+            }, 50);
+            
+            showPrefillBanner(doctor.name, specialty ? specialty.name : '', doctor.avatar, true);
+            
+            setTimeout(() => {
+                document.getElementById('step-1').classList.remove('active');
+                document.getElementById('step-2').classList.add('active');
+                updateProgress(2);
+            }, 150);
+            return true;
+        }
+
+        window.nextStep = function(currentStep) {
+            if (currentStep === 1 && !specialtyValue.value) {
+                showAlert('Thiếu thông tin', 'Vui lòng chọn chuyên khoa trước khi tiếp tục!', 'warning');
+                return;
+            }
+            if (currentStep === 2) {
+                if (!appointmentDate.value) { showAlert('Thiếu thông tin', 'Vui lòng chọn ngày khám!', 'warning'); return; }
+                if (!document.querySelector('input[name="time_slot"]:checked')) { showAlert('Thiếu thông tin', 'Vui lòng chọn khung giờ khám!', 'warning'); return; }
+            }
+            document.getElementById('step-' + currentStep).classList.remove('active');
+            document.getElementById('step-' + (currentStep + 1)).classList.add('active');
+            updateProgress(currentStep + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.prevStep = function(currentStep) {
+            document.getElementById('step-' + currentStep).classList.remove('active');
+            document.getElementById('step-' + (currentStep - 1)).classList.add('active');
+            updateProgress(currentStep - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function updateProgress(step) {
+            for (let i = 1; i <= 3; i++) {
+                const indicator = document.getElementById('step-indicator-' + i);
+                indicator.classList.remove('active', 'completed');
+                if (i < step) { indicator.classList.add('completed'); indicator.innerHTML = '<i class="fas fa-check"></i>'; }
+                else if (i === step) { indicator.classList.add('active'); indicator.innerHTML = i; }
+                else { indicator.innerHTML = i; }
+            }
+        }
+
+        document.getElementById('booking-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selectedDoctorId = doctorValue.value;
+            const selectedDateStr = appointmentDate.value;
+            const selectedTimeInput = document.querySelector('input[name="time_slot"]:checked');
+            
+            if (!specialtyValue.value) { showAlert('Thiếu thông tin', 'Vui lòng chọn chuyên khoa!', 'warning'); return; }
+            if (!selectedDoctorId) { showAlert('Thiếu thông tin', 'Vui lòng chọn bác sĩ!', 'warning'); return; }
+            if (!selectedDateStr) { showAlert('Thiếu thông tin', 'Vui lòng chọn ngày khám!', 'warning'); return; }
+            if (!selectedTimeInput) { showAlert('Thiếu thông tin', 'Vui lòng chọn khung giờ khám!', 'warning'); return; }
+            
+            const selectedTimeSlot = selectedTimeInput.value;
+            const specialtyId = specialtyValue.value;
+            
+            if (!isDoctorWorking(selectedDoctorId, selectedDateStr)) {
+                showAlert('Bác sĩ không làm việc', `Bác sĩ ${getDoctorName(selectedDoctorId)} không có lịch làm việc vào ${getDayOfWeekName(selectedDateStr)}.`, 'error');
+                return;
+            }
+            
+            if (isPatientBusy(selectedDateStr, selectedTimeSlot)) {
+                showAlert('Bạn đã có lịch hẹn', 'Bạn đã có một lịch hẹn khác vào cùng khung giờ này.', 'warning');
+                return;
+            }
+            
+            if (isSlotBooked(selectedDoctorId, selectedDateStr, selectedTimeSlot)) {
+                showAlert('Khung giờ đã được đặt', 'Rất tiếc, khung giờ này vừa được đặt bởi người khác. Vui lòng chọn khung giờ khác.', 'error');
+                renderTimeSlots();
+                return;
+            }
+            
+            const symptomText = document.getElementById('patient-symptoms').value.trim();
+            const isNightShift = selectedTimeSlot.startsWith('18') || selectedTimeSlot.startsWith('19') || selectedTimeSlot.startsWith('20') || selectedTimeSlot.startsWith('21');
+            
+            const items = [
+                { name: 'Tiền khám chuyên khoa', qty: 1, price: 300000 }
+            ];
+            if (isNightShift) {
+                items.push({ name: 'Phụ thu ca tối (+10%)', qty: 1, price: 30000 });
+            }
+            
+            const result = BN_Store.createAppointment({
+                date: selectedDateStr,
+                time_slot: selectedTimeSlot,
+                doctorId: selectedDoctorId,
+                doctorName: getDoctorName(selectedDoctorId),
+                specialtyName: getSpecialtyName(specialtyId),
+                symptoms: symptomText,
+                items: items
+            });
+            
+            if (result.success) {
+                const totalFee = items.reduce((sum, i) => sum + i.qty * i.price, 0);
+                showAlert(
+                    'Đặt lịch thành công! 🎉',
+                    `Lịch hẹn của bạn đã được ghi nhận. Vui lòng đến đúng giờ.`,
+                    'success',
+                    () => { window.location.href = 'danh_sach_lich_hen.html'; },
+                    {
+                        'Mã lịch hẹn': result.appointment.id,
+                        'Bác sĩ': result.appointment.doctor,
+                        'Chuyên khoa': result.appointment.specialty,
+                        'Ngày khám': formatDateDisplay(selectedDateStr),
+                        'Khung giờ': selectedTimeSlot,
+                        'Phí khám': totalFee.toLocaleString('vi-VN') + ' VNĐ'
+                    }
+                );
+            }
+        });
+
+        const doctorId = getUrlParam('doctor_id');
+        const rebookFrom = getUrlParam('rebook_from');
+
+        if (rebookFrom) prefillFromRebook(rebookFrom);
+        else if (doctorId) prefillFromDoctor(doctorId);
+    });
+    </script>
+</body>
+</html>

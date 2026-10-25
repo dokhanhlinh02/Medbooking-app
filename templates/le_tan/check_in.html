@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBOOKING - Chi tiết Khám bệnh</title>
+    <!-- Favicon chuẩn hình trái tim xanh dương -->
+    <link rel="icon" type="image/jpeg" href="/static/favicon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="../../static/css/LT_BS.css">
+    
+    <style>
+        main { max-width: 1000px; margin: 30px auto 80px; padding: 0 20px; }
+
+        .medical-record {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 35px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-glass);
+            margin-bottom: 25px;
+        }
+
+        .record-header {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 2px dashed var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .record-header h2 {
+            font-size: 26px;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .record-header p { color: var(--text-gray); font-size: 14px; }
+
+        .record-section {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .record-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        .record-section h3 {
+            font-size: 16px;
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .record-section h3 i {
+            background: var(--primary-blue-light);
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            background: var(--bg-body);
+            padding: 12px 15px;
+            border-radius: 10px;
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        .info-item .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-gray);
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .info-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .diagnosis-box {
+            background: linear-gradient(135deg, var(--primary-blue-light), var(--primary-blue-soft));
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-blue);
+            font-size: 15px;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+
+        .diagnosis-box strong { color: var(--primary-blue); display: block; margin-bottom: 5px; }
+
+        .prescription-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .prescription-table thead th {
+            text-align: left;
+            padding: 12px 14px;
+            background: var(--primary-blue-light);
+            color: var(--primary-blue);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        .prescription-table thead th:first-child { border-top-left-radius: 8px; }
+        .prescription-table thead th:last-child { border-top-right-radius: 8px; }
+
+        .prescription-table tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-glass);
+            font-size: 14px;
+        }
+
+        .record-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .record-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Nút đăng xuất đồng bộ */
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EF4444;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover {
+            background: #EF4444;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .medical-record { padding: 22px; }
+            .record-actions { flex-direction: column; }
+            .record-actions .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <div class="logo-text">
+                <h1>MedBooking</h1>
+                <p>Cổng Lễ Tân</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <ul>
+                    <li><a href="/le_tan/dashboard.html">Tổng quan</a></li>
+                    <li><a href="/le_tan/quan_ly_lich_hen.html"><strong>Quản lý lịch hẹn</strong></a></li>
+                    <li><a href="/le_tan/danh_sach_lich_hen.html">Danh sách ca trực</a></li>
+                    <li><a href="/le_tan/check_in.html">Check-in</a></li>
+                    <li><a href="/le_tan/vien_phi.html">Viện phí</a></li>
+                </ul>
+            </nav>
+            <div class="user-badge" onclick="window.location.href='ho_so_ca_nhan.html'">
+                <div class="user-avatar" id="topbar-avatar">LT</div>
+                <div class="user-info-text">
+                    <div class="user-name" id="topbar-receptionist-name">Lễ tân</div>
+                    <div class="user-role">Lễ tân</div>
+                </div>
+            </div>
+            <!-- Nút chuyển đổi sáng/tối -->
+            <button class="theme-toggle" id="theme-toggle" title="Chuyển đổi giao diện">
+                <i class="fas fa-moon"></i>
+            </button>
+            <!-- Nút Đăng xuất nằm cạnh nút giao diện -->
+            <button class="logout-btn" onclick="window.location.href='../dk_dn/dn.html'" title="Đăng xuất">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="breadcrumb">
+            <a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="quan_ly_lich_hen.html">Quản lý lịch hẹn</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Chi tiết khám bệnh</span>
+        </div>
+
+        <div class="page-title">
+            <div class="page-title-left">
+                <h2><i class="fas fa-file-medical-alt"></i> Chi tiết Lượt khám bệnh</h2>
+                <p>Xem kết quả khám, chẩn đoán và đơn thuốc của bệnh nhân</p>
+            </div>
+        </div>
+
+        <div class="medical-record">
+            <div class="record-header">
+                <h2><i class="fas fa-file-medical"></i> PHIẾU KẾT QUẢ KHÁM BỆNH</h2>
+                <p>Mã lượt khám: <strong id="record-id">LK9928</strong> • Ngày khám: <strong id="record-date">-</strong></p>
+            </div>
+
+            <div class="record-section">
+                <h3><i class="fas fa-user"></i> Thông tin bệnh nhân</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Họ và tên</div>
+                        <div class="value" id="p-name">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Mã lịch hẹn</div>
+                        <div class="value" id="p-appt-id">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Ngày sinh</div>
+                        <div class="value" id="p-dob">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Số điện thoại</div>
+                        <div class="value" id="p-phone">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="record-section">
+                <h3><i class="fas fa-user-md"></i> Bác sĩ phụ trách</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Bác sĩ khám</div>
+                        <div class="value" id="d-name">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Chuyên khoa</div>
+                        <div class="value" id="d-specialty">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Ca khám</div>
+                        <div class="value" id="d-ca">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Trạng thái</div>
+                        <div class="value"><span class="status-badge completed"><i class="fas fa-check"></i> Đã hoàn thành</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="record-section">
+                <h3><i class="fas fa-notes-medical"></i> Triệu chứng ban đầu</h3>
+                <div class="diagnosis-box">
+                    <strong>Bệnh nhân mô tả:</strong>
+                    <span id="p-symptom">-</span>
+                </div>
+            </div>
+
+            <div class="record-section">
+                <h3><i class="fas fa-heartbeat"></i> Sinh hiệu đo được</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Huyết áp</div>
+                        <div class="value">130/85 mmHg</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Nhịp tim</div>
+                        <div class="value">82 bpm</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Nhiệt độ</div>
+                        <div class="value">36.8 °C</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Cân nặng</div>
+                        <div class="value">58 kg</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="record-section">
+                <h3><i class="fas fa-stethoscope"></i> Chẩn đoán của bác sĩ</h3>
+                <div class="diagnosis-box">
+                    <strong>Chẩn đoán chính:</strong>
+                    <span id="p-diagnosis">Tăng huyết áp độ 1 - Cần theo dõi và điều trị.</span>
+                </div>
+            </div>
+
+            <div class="record-section">
+                <h3><i class="fas fa-pills"></i> Đơn thuốc</h3>
+                <table class="prescription-table">
+                    <thead>
+                        <tr>
+                            <th>Tên thuốc</th>
+                            <th>Liều lượng</th>
+                            <th>Số lượng</th>
+                            <th>Cách dùng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Amlodipine 5mg</td>
+                            <td>1 viên/lần</td>
+                            <td>30 viên</td>
+                            <td>Uống 1 lần/ngày, buổi sáng</td>
+                        </tr>
+                        <tr>
+                            <td>Bisoprolol 2.5mg</td>
+                            <td>1 viên/lần</td>
+                            <td>30 viên</td>
+                            <td>Uống 1 lần/ngày, buổi tối</td>
+                        </tr>
+                        <tr>
+                            <td>Aspirin 81mg</td>
+                            <td>1 viên/lần</td>
+                            <td>30 viên</td>
+                            <td>Uống 1 lần/ngày, sau ăn</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="record-section">
+                <h3><i class="fas fa-comment-medical"></i> Lời dặn của bác sĩ</h3>
+                <div class="diagnosis-box">
+                    <strong>Hướng dẫn:</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px; font-size: 14px; line-height: 1.7;">
+                        <li>Uống thuốc đúng liều lượng, không tự ý ngưng thuốc</li>
+                        <li>Hạn chế muối, chất béo, không sử dụng rượu bia, thuốc lá</li>
+                        <li>Tập thể dục nhẹ nhàng 30 phút/ngày</li>
+                        <li>Tái khám sau 2 tuần hoặc ngay khi có triệu chứng bất thường</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="record-actions">
+                <a href="quan_ly_lich_hen.html" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+                <button class="btn btn-primary" onclick="printRecord()">
+                    <i class="fas fa-print"></i> In phiếu khám / Đơn thuốc
+                </button>
+                <a id="btn-view-invoice" href="#" class="btn btn-success">
+                    <i class="fas fa-file-invoice-dollar"></i> Xem hóa đơn viện phí
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div>
+            <div class="footer-logo">
+                <div class="logo-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                <div class="logo-text">
+                    <h1>MedBooking</h1>
+                    <p>Cổng Lễ Tân</p>
+                </div>
+            </div>
+            <p>Hệ thống quản lý y tế MedBooking - Giải pháp toàn diện cho bệnh viện và phòng khám.</p>
+            <p><strong>"MedBooking chúc quý khách và gia đình luôn có một sức khỏe dồi dào!"</strong></p>
+        </div>
+        <div>
+            <h4>Liên kết nhanh</h4>
+            <ul>
+                <li><a href="dashboard.html">Tổng quan</a></li>
+                <li><a href="quan_ly_lich_hen.html">Quản lý lịch hẹn</a></li>
+                <li><a href="check_in.html">Check-in</a></li>
+                <li><a href="vien_phi.html">Viện phí</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Thông tin liên hệ</h4>
+            <p>Địa chỉ: Số 15, Phố Dịch Vọng Hậu, Quận Cầu Giấy, Hà Nội</p>
+            <p>Hotline: 1900 6868</p>
+            <p>Email: support@medbooking.vn</p>
+        </div>
+        <div>
+            <p>&copy; 2026 MedBooking. Bản quyền thuộc về Đội ngũ phát triển dự án.</p>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon"><i class="fas fa-info"></i></div>
+            <h3 id="modal-title">Thông báo</h3>
+            <p id="modal-message">Nội dung thông báo</p>
+            <div class="modal-actions" id="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="modal-confirm-btn">
+                    <i class="fas fa-check"></i> Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../static/js/client.js"></script>
+    <script src="../../static/js/LT_Store.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ============================================================
+            // ĐỒNG BỘ THÔNG TIN ĐĂNG NHẬP TỪ LOCALSTORAGE
+            // ============================================================
+            try {
+                let receptionistName = 'Lễ tân';
+                const loggedInUser = localStorage.getItem('medbooking_logged_in_user');
+                const currentUser = localStorage.getItem('medbooking_current_user');
+                const currentEmail = localStorage.getItem('medbooking_email');
+
+                if (loggedInUser) {
+                    const userData = JSON.parse(loggedInUser);
+                    receptionistName = userData.name || userData.fullname || userData.ho_ten || receptionistName;
+                } else if (currentUser) {
+                    const userData = JSON.parse(currentUser);
+                    receptionistName = userData.name || userData.fullname || userData.ho_ten || receptionistName;
+                } else if (currentEmail) {
+                    const users = JSON.parse(localStorage.getItem('medbooking_users')) || [];
+                    const found = users.find(u => u.email === currentEmail);
+                    if (found) {
+                        receptionistName = found.fullname || found.name || receptionistName;
+                    }
+                }
+
+                const topbarNameEl = document.getElementById('topbar-receptionist-name');
+                if (topbarNameEl) topbarNameEl.textContent = receptionistName;
+
+                const cleanName = receptionistName.trim();
+                const parts = cleanName.split(/\s+/);
+                let initials = 'LT';
+                if (parts.length >= 2) {
+                    initials = (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+                } else if (parts.length === 1 && parts[0].length > 0) {
+                    initials = parts[0].slice(0, 2).toUpperCase();
+                }
+
+                const topbarAvatar = document.getElementById('topbar-avatar');
+                if (topbarAvatar) topbarAvatar.textContent = initials;
+
+            } catch (e) {
+                console.error("Không thể tải thông tin lễ tân từ localStorage:", e);
+            }
+
+            // THEME
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggle.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+
+            // MODAL
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalActions = document.getElementById('modal-actions');
+
+            window.showAlert = function(title, message, type = 'info', callback = null) {
+                modalIcon.className = 'modal-icon ' + type;
+                const iconEl = modalIcon.querySelector('i');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
+                iconEl.className = 'fas ' + icons[type];
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalActions.innerHTML = `<button class="modal-btn modal-btn-primary" id="modal-confirm-btn"><i class="fas fa-check"></i> Đã hiểu</button>`;
+                modalOverlay.classList.add('active');
+                document.getElementById('modal-confirm-btn').onclick = function() {
+                    closeModal();
+                    if (callback) callback();
+                };
+            };
+
+            function closeModal() { modalOverlay.classList.remove('active'); }
+            modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
+
+            // URL PARAM & VIEW INVOICE
+            const urlParams = new URLSearchParams(window.location.search);
+            const appointmentId = urlParams.get('id');
+            
+            const btnViewInvoice = document.getElementById('btn-view-invoice');
+            if (btnViewInvoice) {
+                if (appointmentId) {
+                    btnViewInvoice.href = `vien_phi.html?appointment_id=${appointmentId}`;
+                } else {
+                    btnViewInvoice.href = 'vien_phi.html';
+                }
+            }
+
+            // LOAD THÔNG TIN TỪ LT_Store
+            if (appointmentId) {
+                const appt = LT_Store.getAppointmentById(appointmentId);
+                if (appt) {
+                    document.getElementById('record-id').textContent = 'LK' + appt.id.replace('LH', '');
+                    document.getElementById('record-date').textContent = new Date(appt.date).toLocaleDateString('vi-VN');
+                    document.getElementById('p-name').textContent = appt.patientName;
+                    document.getElementById('p-appt-id').textContent = appt.id;
+                    document.getElementById('p-dob').textContent = '15/08/1995';
+                    document.getElementById('p-phone').textContent = appt.phone;
+                    document.getElementById('d-name').textContent = appt.doctor;
+                    document.getElementById('d-specialty').textContent = appt.specialty;
+                    document.getElementById('d-ca').textContent = (appt.ca === 'sang' ? 'Ca sáng' : appt.ca === 'chieu' ? 'Ca chiều' : 'Ca tối') + ' • ' + appt.time;
+                    document.getElementById('p-symptom').textContent = appt.symptom || 'Không có mô tả';
+                }
+            }
+
+            window.printRecord = function() {
+                showAlert('In phiếu khám', 'Đang kết nối máy in... Vui lòng chờ trong giây lát.', 'info');
+            };
+        });
+    </script>
+</body>
+</html>
